@@ -20,5 +20,12 @@ data class ContactEntity(
     val email : String? = "",
 
     @ColumnInfo(name = "image_url")
-    val imageUrl : String? = ""
+    val imageUrl : String? = "",
+
+    @ColumnInfo(name = "is_favorite")
+    val isFavorite : Boolean = false,
+
+    @ColumnInfo(name = "color_default")
+    val colorDefault : Int = 0
+
 )
