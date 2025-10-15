@@ -10,7 +10,7 @@ import com.example.connectify.data.local.entities.ContactEntity
 
 @Database(
     entities = [ContactEntity::class],
-    version = 2
+    version = 1
 )
 abstract class ConnectifyDatabase : RoomDatabase() {
     abstract fun contactDao() : ContactDao
