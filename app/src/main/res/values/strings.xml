@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Connectify</string>
+    <string name="all_contacts">All Contacts</string>
 </resources>
