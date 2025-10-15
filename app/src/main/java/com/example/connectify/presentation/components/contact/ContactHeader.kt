@@ -15,21 +15,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.connectify.domain.models.Contact
+import com.example.connectify.presentation.components.global.BodyMedium
 import com.example.connectify.presentation.components.global.BoxCircle
 import com.example.connectify.presentation.components.global.LazyImage
 import com.example.connectify.presentation.components.global.TitleLarge
 import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.Spacing
+import com.example.connectify.utils.ContactCardModifiers
 
 @Composable
 fun ContactHeader(
-    modifier: Modifier = Modifier,
+    modifiers: ContactCardModifiers = ContactCardModifiers(),
     contact: Contact
 ) {
 
     Box(
-        modifier = modifier
+        modifier = modifiers.cardModifier
             .height(250.dp)
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background),
@@ -43,12 +45,12 @@ fun ContactHeader(
 
             LazyImage(
                 uri = contact.imageUrl,
-                modifier = Modifier
+                modifier = modifiers.imageModifier
                     .size(Card.card_3xl)
                     .clip(CircleShape)
             ) {
                 BoxCircle(
-                    modifier = Modifier
+                    modifier = modifiers.imageModifier
                         .size(Card.card_3xl)
                         .background(
                             shape = CircleShape,
@@ -62,7 +64,10 @@ fun ContactHeader(
                     }
                 )
             }
-            TitleMedium(text = contact.name)
+            TitleMedium(
+                text = contact.name,
+                modifier = modifiers.textModifier
+            )
         }
     }
 }
