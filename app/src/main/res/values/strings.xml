@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Connectify</string>
     <string name="all_contacts">All Contacts</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="phone_number">Phone number</string>
+    <string name="email">Email</string>
+    <string name="name">Name</string>
+    <string name="save">Save</string>
+    <string name="successful_created">Successful created</string>
 </resources>

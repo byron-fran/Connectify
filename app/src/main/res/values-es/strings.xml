@@ -2,4 +2,10 @@
 <resources>
     <string name="app_name">Connectify</string>
     <string name="all_contacts">Todos los contactos</string>
+    <string name="add_contact">Agregar contacto</string>
+    <string name="phone_number">Número de teléfono</string>
+    <string name="email">Correo electronico</string>
+    <string name="name">Nombre</string>
+    <string name="save">Guardar</string>
+    <string name="successful_created">Creado correctamente</string>
 </resources>
