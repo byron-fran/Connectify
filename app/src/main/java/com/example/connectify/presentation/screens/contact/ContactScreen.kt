@@ -17,6 +17,7 @@ import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactList
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
+import com.example.connectify.presentation.navigation.Screens
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.Spacing
 
@@ -26,8 +27,8 @@ fun ContactScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     contactViewModel: ContactViewModel = hiltViewModel(),
+    onNavigateTo : (Screens) -> Unit,
     onNavigateToContactDetail: (String) -> Unit
-
 ) {
     val contacts = contactViewModel.contactState.collectAsState().value.contacts
 
@@ -45,7 +46,7 @@ fun ContactScreen(
             FloatingActionButton(
 
                 onClick = {
-                    // TODO: Navigate to add contact screen
+                    onNavigateTo(Screens.AddContact)
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -59,8 +60,7 @@ fun ContactScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(
-            modifier = Modifier.padding(paddingValues)
+        Column(modifier = Modifier.padding(paddingValues)
         ) {
             ContactList(
                 contacts = contacts,
