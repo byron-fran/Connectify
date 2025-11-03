@@ -1,22 +1,24 @@
 package com.example.connectify.utils
 
 import android.content.Context
-import android.media.MediaMetadataRetriever
+import android.util.Log
 import androidx.core.net.toUri
 
 object ByteArrayUtils {
 
-    fun getByteArray(uri: String?, context: Context): ByteArray? {
-        val retriever = MediaMetadataRetriever()
-        try {
-            retriever.setDataSource(context, uri?.toUri())
+    fun getByteArray(uriString: String?, context: Context): ByteArray? {
 
-            return retriever.embeddedPicture
+        if (uriString == null) return null
 
-        } catch (_: Throwable) {
-            return null
-        } finally {
-            retriever.release()
+        return try {
+            val uri = uriString.toUri() // Usa Uri.parse() que es el estándar
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                inputStream.readBytes()
+            }
+        } catch (e: Exception) {
+            // Es buena idea registrar el error para depuración
+            Log.e("ByteArrayUtils", "Error al leer bytes de la URI: $uriString", e)
+            null
         }
     }
 }
