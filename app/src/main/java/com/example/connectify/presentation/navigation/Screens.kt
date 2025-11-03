@@ -2,16 +2,19 @@ package com.example.connectify.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-object Screens {
+sealed class Screens {
+    @Serializable
+    object Search : Screens()
 
     @Serializable
-    object Search
-
-
-    @Serializable
-    object Contacts
+    object Contacts : Screens()
 
     @Serializable
-    data class ContactDetail(val contactId : String)
+    data class ContactDetail(val contactId : String) : Screens()
 
+    @Serializable
+    object AddContact : Screens()
+
+    @Serializable
+    data class EditContact(val contactId : String) : Screens()
 }
