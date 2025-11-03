@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +31,7 @@ import com.example.connectify.presentation.components.global.BodySmall
 import com.example.connectify.presentation.components.global.BoxCircle
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.CustomIconButton
+import com.example.connectify.presentation.components.global.CustomImage
 import com.example.connectify.presentation.components.global.LazyImage
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.Spacing
@@ -44,7 +46,9 @@ fun ContactCard(
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.fillMaxWidth().animateContentSize(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
         shape = RoundedCornerShape(Spacing.spacing_md),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -56,6 +60,7 @@ fun ContactCard(
             verticalAlignment = Alignment.Top,
             modifier = Modifier.padding(vertical = Spacing.spacing_sm)
         ) {
+
             LazyImage(
                 uri = contact.imageUrl,
                 modifier = modifiers.imageModifier.clickable { onNavigate() }.clip(CircleShape).size(Card.card_md)
@@ -101,7 +106,7 @@ fun ContactCard(
                                 alpha = 0.7f
                             )
                         )
-                        contact.email?.let {
+                        if (!contact.email.isNullOrBlank()) {
                             CustomIcon(
                                 icon = R.drawable.icon_circle,
                                 size = 4.dp,
@@ -110,7 +115,7 @@ fun ContactCard(
                                 )
                             )
                             BodySmall(
-                                text = contact.email,
+                                text = contact.email ?: "",
                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                     alpha = 0.7f
                                 )
