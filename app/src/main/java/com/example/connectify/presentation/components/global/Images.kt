@@ -1,8 +1,10 @@
 package com.example.connectify.presentation.components.global
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,34 +32,61 @@ fun LazyImage(
     val context = LocalContext.current
 
     LaunchedEffect(uri) {
-        withContext(Dispatchers.IO) {
-            uri?.let {
-                val byteArray = ByteArrayUtils.getByteArray(uri, context)
-                byteArray?.let {
-                    imageBitMap = BitMapUtils.decodeBitmapWithSubsampling(byteArray, 300, 300)
+        if(uri?.isNotBlank() == true) {
+            withContext(Dispatchers.IO) {
+                uri.let {
+                    val byteArray = ByteArrayUtils.getByteArray(uri, context)
+                    byteArray?.let {
+                        val bitmap = BitMapUtils.decodeBitmapWithSubsampling(byteArray, 300, 300)
+                        imageBitMap = bitmap
+                    }
                 }
             }
         }
     }
 
-    if (imageBitMap != null) {
-        imageBitMap?.let { bitmap ->
-            Image(
-                bitmap = imageBitMap!!.asImageBitmap(),
-                contentScale = ContentScale.Crop,
-                modifier = modifier,
-                contentDescription = null
-            )
+    imageBitMap?.let { bitmap ->
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentScale = ContentScale.Crop,
+            modifier = modifier,
+            contentDescription = null
+        )
+    } ?: defaultContent()
+}
+
+@Composable
+fun CustomImage(uri: String, modifier: Modifier = Modifier) {
+    var imageBitMap by remember { mutableStateOf<Bitmap?>(null) }
+    val context = LocalContext.current
+
+    LaunchedEffect(uri) {
+        if (uri.isNotBlank()) {
+            withContext(Dispatchers.IO) {
+                val byteArray = ByteArrayUtils.getByteArray(uri, context)
+                byteArray?.let {
+                    val bitmap = BitMapUtils.decodeBitmapWithSubsampling(byteArray, 300, 300)
+                    imageBitMap = bitmap
+                }
+            }
         }
-    } else {
-        defaultContent()
+    }
+
+    imageBitMap?.let { bitmap ->
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentScale = ContentScale.Crop,
+            modifier = modifier,
+            contentDescription = null
+        )
     }
 }
+
 
 @Composable
 fun BoxCircle(
     modifier: Modifier = Modifier,
-    content : @Composable () -> Unit
+    content: @Composable () -> Unit
 ) {
     Box(
         modifier = modifier,
