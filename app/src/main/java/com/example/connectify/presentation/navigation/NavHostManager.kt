@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.connectify.presentation.screens.contact.AddContactScreen
 import com.example.connectify.presentation.screens.contact.ContactDetailScreen
 import com.example.connectify.presentation.screens.contact.ContactScreen
+import com.example.connectify.presentation.screens.search.SearchScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -24,7 +26,10 @@ fun NavHostManager() {
             composable<Screens.Contacts> {
                 ContactScreen(
                     sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@composable
+                    animatedContentScope = this@composable,
+                    onNavigateTo = {
+                        navController.navigate(it)
+                    }
                 ) {
                     navController.navigate(Screens.ContactDetail(it))
                 }
@@ -41,6 +46,19 @@ fun NavHostManager() {
                 ) {
                     navController.popBackStack()
                 }
+            }
+            composable<Screens.AddContact> {
+                AddContactScreen(
+                    onNavigateTo = {
+                        navController.navigate(it)
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable<Screens.Search> {
+                SearchScreen()
             }
         }
     }
