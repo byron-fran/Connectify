@@ -6,12 +6,12 @@ import kotlin.random.Random
 
 data class Contact(
     val id : String = UUID.randomUUID().toString(),
-    val name : String = "",
-    val phoneNumber : Int = 0,
-    val email : String? = "",
-    val imageUrl : String? = "",
-    val description : String? = "",
-    val isFavorite : Boolean = false,
+    var name : String = "",
+    var phoneNumber : Long = 0,
+    var email : String? = "",
+    var imageUrl : String? = "",
+    var description : String? = "",
+    var isFavorite : Boolean = false,
     val colorDefault: Color = Color(
         red = Random.nextInt(256),
         green = Random.nextInt(256),
