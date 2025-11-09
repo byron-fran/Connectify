@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,7 +54,7 @@ fun ContactScreen(
             ) {
                 CustomIcon(
                     icon = R.drawable.icon_add,
-                    size = Card.card_sm,
+                    modifier = Modifier.size(  Card.card_sm),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
