@@ -1,10 +1,8 @@
 package com.example.connectify.presentation.components.global
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,25 +20,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun LazyImage(
+fun ContactImage(
     uri: String?,
     modifier: Modifier = Modifier,
-    defaultContent: @Composable () -> Unit
+    defaultContent: @Composable () -> Unit = {}
 ) {
 
     var imageBitMap by remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
 
     LaunchedEffect(uri) {
-        if(uri?.isNotBlank() == true) {
-            withContext(Dispatchers.IO) {
-                uri.let {
-                    val byteArray = ByteArrayUtils.getByteArray(uri, context)
-                    byteArray?.let {
-                        val bitmap = BitMapUtils.decodeBitmapWithSubsampling(byteArray, 300, 300)
-                        imageBitMap = bitmap
-                    }
-                }
+
+        withContext(Dispatchers.IO) {
+            val byteArray = ByteArrayUtils.getByteArray(uri, context)
+            if(byteArray != null) {
+                val bitmap = BitMapUtils.decodeBitmapWithSubsampling(byteArray, 300, 300)
+                imageBitMap = bitmap
+            }
+            else {
+                imageBitMap = null
             }
         }
     }
@@ -53,33 +51,6 @@ fun LazyImage(
             contentDescription = null
         )
     } ?: defaultContent()
-}
-
-@Composable
-fun CustomImage(uri: String, modifier: Modifier = Modifier) {
-    var imageBitMap by remember { mutableStateOf<Bitmap?>(null) }
-    val context = LocalContext.current
-
-    LaunchedEffect(uri) {
-        if (uri.isNotBlank()) {
-            withContext(Dispatchers.IO) {
-                val byteArray = ByteArrayUtils.getByteArray(uri, context)
-                byteArray?.let {
-                    val bitmap = BitMapUtils.decodeBitmapWithSubsampling(byteArray, 300, 300)
-                    imageBitMap = bitmap
-                }
-            }
-        }
-    }
-
-    imageBitMap?.let { bitmap ->
-        Image(
-            bitmap = bitmap.asImageBitmap(),
-            contentScale = ContentScale.Crop,
-            modifier = modifier,
-            contentDescription = null
-        )
-    }
 }
 
 
