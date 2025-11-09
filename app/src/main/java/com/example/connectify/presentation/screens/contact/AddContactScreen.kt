@@ -21,6 +21,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.presentation.components.contact.ContactForm
+import com.example.connectify.presentation.components.contact.ContactFormImage
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.navigation.Screens
 import com.example.connectify.ui.theme.Spacing
@@ -51,6 +52,7 @@ fun AddContactScreen(
         }
     )
 
+
     Scaffold(
         topBar = {
             ConnectifyToAppBar(title = stringResource(id = R.string.add_contact)) {
@@ -59,22 +61,27 @@ fun AddContactScreen(
         }
     ) { paddingValues ->
 
+        val uri : String? = imageUri?.toString()
+
+
         Column(modifier = Modifier.padding(paddingValues)) {
-            ContactForm(
-                name = name,
-                phoneNumber = phoneNumber,
-                email = email,
+            ContactFormImage(
                 imageUri = imageUri?.toString(),
-                isButtonEnabled = validateContact(name, phoneNumber),
-                onNameChange = { name = it },
-                onPhoneNumberChange = { phoneNumber = it },
-                onEmailChange = { email = it },
-                onClearImage = { imageUri = null },
                 onImageChange = {
                     singlePhotoPickerLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                     )
                 },
+                onClearImage = { imageUri = null }
+            )
+            ContactForm(
+                name = name,
+                phoneNumber = phoneNumber,
+                email = email,
+                isButtonEnabled = validateContact(name, phoneNumber),
+                onNameChange = { name = it },
+                onPhoneNumberChange = { phoneNumber = it },
+                onEmailChange = { email = it },
                 modifier = Modifier.padding(
                     horizontal = Spacing.spacing_sm,
                     vertical = Spacing.spacing_lg
@@ -95,6 +102,6 @@ fun AddContactScreen(
     }
 }
 
-internal fun validateContact(name: String, phoneNumber: String): Boolean {
+private fun validateContact(name: String, phoneNumber: String): Boolean {
     return name.trim().isNotEmpty() && phoneNumber.trim().isNotEmpty()
 }
