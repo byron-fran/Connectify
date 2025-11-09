@@ -19,13 +19,12 @@ fun CustomIcon(
     @DrawableRes icon: Int,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
-    size: Dp =Card.card_xs,
 ) {
 
     Icon(
         painter = painterResource(id = icon),
         contentDescription = null,
-        modifier = modifier.size(size),
+        modifier = modifier,
         tint = color
     )
 
