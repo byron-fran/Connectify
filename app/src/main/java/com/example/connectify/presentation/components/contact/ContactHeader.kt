@@ -11,13 +11,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.connectify.domain.models.Contact
-import com.example.connectify.presentation.components.global.BodyMedium
 import com.example.connectify.presentation.components.global.BoxCircle
-import com.example.connectify.presentation.components.global.LazyImage
+import com.example.connectify.presentation.components.global.ContactImage
 import com.example.connectify.presentation.components.global.TitleLarge
 import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.ui.theme.Card
@@ -43,7 +41,7 @@ fun ContactHeader(
             verticalArrangement = Arrangement.spacedBy(Spacing.spacing_lg)
         ) {
 
-            LazyImage(
+            ContactImage(
                 uri = contact.imageUrl,
                 modifier = modifiers.imageModifier
                     .size(Card.card_3xl)
