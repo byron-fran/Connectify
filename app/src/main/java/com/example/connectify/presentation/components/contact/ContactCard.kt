@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,9 +29,7 @@ import com.example.connectify.presentation.components.global.BodyLarge
 import com.example.connectify.presentation.components.global.BodySmall
 import com.example.connectify.presentation.components.global.BoxCircle
 import com.example.connectify.presentation.components.global.CustomIcon
-import com.example.connectify.presentation.components.global.CustomIconButton
-import com.example.connectify.presentation.components.global.CustomImage
-import com.example.connectify.presentation.components.global.LazyImage
+import com.example.connectify.presentation.components.global.ContactImage
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.ContactCardModifiers
@@ -61,9 +58,12 @@ fun ContactCard(
             modifier = Modifier.padding(vertical = Spacing.spacing_sm)
         ) {
 
-            LazyImage(
+            ContactImage(
                 uri = contact.imageUrl,
-                modifier = modifiers.imageModifier.clickable { onNavigate() }.clip(CircleShape).size(Card.card_md)
+                modifier = modifiers.imageModifier
+                    .clickable { onNavigate() }
+                    .clip(CircleShape)
+                    .size(Card.card_md)
             ) {
                 BoxCircle(
                     modifier = modifiers.imageModifier
@@ -109,7 +109,7 @@ fun ContactCard(
                         if (!contact.email.isNullOrBlank()) {
                             CustomIcon(
                                 icon = R.drawable.icon_circle,
-                                size = 4.dp,
+                                modifier = Modifier.size(4.dp),
                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                     alpha = 0.7f
                                 )
@@ -127,93 +127,13 @@ fun ContactCard(
         }
 
         if (isExpanded) {
-            ContactCardBottom(
+            ContactOptions(
                 onClickMessage = { /*TODO*/ },
                 onClickPhone = { /*TODO*/ },
                 onClickEmail = { /*TODO*/ },
-                onClickShare = { /*TODO*/ }
-
+                onClickShare = { /*TODO*/ },
+                modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.spacing_md)
             )
-        }
-    }
-
-}
-
-@Composable
-fun ContactCardBottom(
-    modifier: Modifier = Modifier,
-    onClickMessage: () -> Unit,
-    onClickPhone: () -> Unit,
-    onClickEmail: () -> Unit,
-    onClickShare: () -> Unit
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = Spacing.spacing_md),
-        horizontalArrangement = Arrangement.Center
-    ) {
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_lg)
-        ) {
-
-            CustomIconButton(
-                icon = R.drawable.icon_message,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.2f
-                        ),
-                        shape = CircleShape
-                    )
-                    .padding(Spacing.spacing_md)
-            ) {
-                onClickMessage()
-            }
-            CustomIconButton(
-                icon = R.drawable.icon_phone,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.2f
-                        ),
-                        shape = CircleShape
-                    )
-                    .padding(Spacing.spacing_md)
-            ) {
-                onClickPhone()
-            }
-            CustomIconButton(
-                icon = R.drawable.icon_email,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.2f
-                        ),
-                        shape = CircleShape
-                    )
-                    .padding(Spacing.spacing_md)
-            ) {
-                onClickEmail()
-            }
-            CustomIconButton(
-                icon = R.drawable.icon_share,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.2f
-                        ),
-                        shape = CircleShape
-                    )
-                    .padding(Spacing.spacing_md)
-            ) {
-                onClickShare()
-            }
         }
     }
 }
