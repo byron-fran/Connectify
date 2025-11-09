@@ -102,3 +102,61 @@ fun BodySmall(
         modifier = modifier
     )
 }
+
+@Composable
+fun LabelSmall(
+    text: String,
+    modifier : Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Left,
+    color: Color = MaterialTheme.colorScheme.onBackground,
+    maxLines: Int = 1
+) {
+    Text(
+        text = text,
+        style = Typography.labelSmall,
+        color = color,
+        textAlign = textAlign,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = maxLines,
+        modifier = modifier
+    )
+}
+
+
+@Composable
+fun LabelMedium(
+    text: String,
+    modifier : Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Left,
+    color: Color = MaterialTheme.colorScheme.onBackground,
+    maxLines: Int = 1
+){
+    Text(
+        text = text,
+        style = Typography.labelMedium,
+        color = color,
+        textAlign = textAlign,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = maxLines,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun LabelLarge(
+    text: String,
+    modifier : Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Left,
+    color: Color = MaterialTheme.colorScheme.onBackground,
+    maxLines: Int = 1
+){
+    Text(
+        text = text,
+        style = Typography.labelLarge,
+        color = color,
+        textAlign = textAlign,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = maxLines,
+        modifier = modifier
+    )
+}
