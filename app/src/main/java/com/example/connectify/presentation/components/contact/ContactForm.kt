@@ -21,10 +21,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.connectify.R
 import com.example.connectify.presentation.components.global.ButtonPrimary
+import com.example.connectify.presentation.components.global.ContactImage
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.presentation.components.global.LabelMedium
-import com.example.connectify.presentation.components.global.ContactImage
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.RoundedCorner
 import com.example.connectify.ui.theme.Spacing
