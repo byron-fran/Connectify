@@ -1,5 +1,6 @@
 package com.example.connectify.presentation.screens.contact
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -11,10 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactForm
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
+import com.example.connectify.ui.theme.Spacing
 
 @Composable
 fun ContactEditScreen(
@@ -50,30 +53,32 @@ fun ContactEditScreen(
             }
         }
     ) { paddingValues ->
-        contactState.contact?.let {
-            ContactForm(
-                modifier = Modifier.padding(paddingValues),
-                name = name,
-                phoneNumber = phoneNumber,
-                email = email,
-                onNameChange = { newValue ->
-                    name = newValue
-                },
-                onEmailChange = { newValue ->
-                    email = newValue
-                },
-                onPhoneNumberChange = { newValue ->
-                    phoneNumber = newValue
-                },
-                isButtonEnabled = validateContact(name, phoneNumber)
-            ) {
-                val updatedContact = it.copy(
+        Column(modifier = Modifier.padding(paddingValues)) {
+            contactState.contact?.let {
+                ContactForm(
+                    modifier = Modifier.padding(vertical = Spacing.spacing_md, horizontal = Spacing.spacing_sm),
                     name = name,
+                    phoneNumber = phoneNumber,
                     email = email,
-                    phoneNumber = phoneNumber.toLong()
-                )
-                contactViewModel.updateContact(updatedContact)
-                onNavigateBack()
+                    onNameChange = { newValue ->
+                        name = newValue
+                    },
+                    onEmailChange = { newValue ->
+                        email = newValue
+                    },
+                    onPhoneNumberChange = { newValue ->
+                        phoneNumber = newValue
+                    },
+                    isButtonEnabled = validateContact(name, phoneNumber)
+                ) {
+                    val updatedContact = it.copy(
+                        name = name,
+                        email = email,
+                        phoneNumber = phoneNumber.toLong()
+                    )
+                    contactViewModel.updateContact(updatedContact)
+                    onNavigateBack()
+                }
             }
         }
     }
