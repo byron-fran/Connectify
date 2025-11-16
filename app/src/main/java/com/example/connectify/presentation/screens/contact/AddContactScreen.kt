@@ -102,6 +102,6 @@ fun AddContactScreen(
     }
 }
 
-private fun validateContact(name: String, phoneNumber: String): Boolean {
+internal fun validateContact(name: String, phoneNumber: String): Boolean {
     return name.trim().isNotEmpty() && phoneNumber.trim().isNotEmpty()
 }
