@@ -43,3 +43,31 @@ fun ButtonPrimary(
         )
     }
 }
+
+@Composable
+fun ButtonError(
+    text: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+
+    Button(
+        modifier = modifier,
+        shape = RoundedCornerShape(
+            RoundedCorner.rounded_corner_md
+        ),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError
+        ),
+        onClick = { onClick() }
+    ) {
+
+        BodyMedium(
+            text = text,
+            maxLines = 1,
+            color = MaterialTheme.colorScheme.onError
+
+        )
+    }
+}
