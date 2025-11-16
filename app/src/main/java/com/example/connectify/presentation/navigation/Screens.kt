@@ -16,5 +16,5 @@ sealed class Screens {
     object AddContact : Screens()
 
     @Serializable
-    data class EditContact(val contactId : String) : Screens()
+    data class EditContact(val contactId : String?) : Screens()
 }
