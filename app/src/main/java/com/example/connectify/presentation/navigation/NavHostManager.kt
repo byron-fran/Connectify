@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.connectify.presentation.screens.contact.AddContactScreen
 import com.example.connectify.presentation.screens.contact.ContactDetailScreen
+import com.example.connectify.presentation.screens.contact.ContactEditScreen
 import com.example.connectify.presentation.screens.contact.ContactScreen
 import com.example.connectify.presentation.screens.search.SearchScreen
 
@@ -40,8 +41,11 @@ fun NavHostManager() {
 
                 ContactDetailScreen(
                     contactId = contactId,
-                    sharedTransitionScope   = this@SharedTransitionLayout,
-                    animatedContentScope = this@composable
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@composable,
+                    onNavigateTo = {
+                        navController.navigate(Screens.EditContact(contactId))
+                    }
 
                 ) {
                     navController.popBackStack()
@@ -56,6 +60,12 @@ fun NavHostManager() {
                         navController.popBackStack()
                     }
                 )
+            }
+            composable<Screens.EditContact> { navBackStackEntry ->
+                val contactId = navBackStackEntry.arguments?.getString("contactId")
+                ContactEditScreen(contactId) {
+                    navController.popBackStack()
+                }
             }
             composable<Screens.Search> {
                 SearchScreen()
