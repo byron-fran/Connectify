@@ -8,4 +8,12 @@
     <string name="name">Nombre</string>
     <string name="save">Guardar</string>
     <string name="successful_created">Creado correctamente</string>
+    <string name="edit_contact">Editar contacto</string>
+    <string name="delete_contact">Eliminar contacto</string>
+    <string name="send_message">Enviar un mensaje</string>
+    <string name="call_contact">Llamar a este contacto</string>
+    <string name="send_email">Enviar un correo</string>
+    <string name="confirm_delete">Si, eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm_delete_message">Estas seguro de eliminar este contacto ?</string>
 </resources>
