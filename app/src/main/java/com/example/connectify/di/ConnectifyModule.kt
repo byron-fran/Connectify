@@ -3,6 +3,7 @@ package com.example.connectify.di
 import android.content.Context
 import androidx.room.Room
 import com.example.connectify.data.local.dao.ContactDao
+import com.example.connectify.data.local.dao.SearchDao
 import com.example.connectify.data.local.database.ConnectifyDatabase
 import dagger.Module
 import dagger.Provides
@@ -34,4 +35,9 @@ object ConnectifyModule {
         return connectifyDataBase.contactDao()
     }
 
+    @Singleton
+    @Provides
+    fun searchDaoProvider(connectifyDatabase: ConnectifyDatabase) : SearchDao {
+        return connectifyDatabase.searchDao()
+    }
 }
