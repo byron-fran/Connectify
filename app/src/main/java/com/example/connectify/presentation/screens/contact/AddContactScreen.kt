@@ -23,6 +23,7 @@ import com.example.connectify.domain.models.Contact
 import com.example.connectify.presentation.components.contact.ContactForm
 import com.example.connectify.presentation.components.contact.ContactFormImage
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
+import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.presentation.navigation.Screens
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.FileUtils
@@ -55,14 +56,13 @@ fun AddContactScreen(
 
     Scaffold(
         topBar = {
-            ConnectifyToAppBar(title = stringResource(id = R.string.add_contact)) {
+            ConnectifyToAppBar(
+                title = { TitleMedium( stringResource(id = R.string.add_contact)) }
+            ) {
                 onNavigateBack()
             }
         }
     ) { paddingValues ->
-
-        val uri : String? = imageUri?.toString()
-
 
         Column(modifier = Modifier.padding(paddingValues)) {
             ContactFormImage(
