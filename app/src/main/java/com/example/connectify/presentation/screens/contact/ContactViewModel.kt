@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.domain.useCases.ContactUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,9 +24,9 @@ class ContactViewModel @Inject constructor(
         getAllContacts()
     }
 
-    fun insertContact(contact : Contact) {
+    fun insertContact(contact: Contact) {
         viewModelScope.launch {
-          contactUseCases.insertContact(contact)
+            contactUseCases.insertContact(contact)
         }
     }
 
@@ -44,7 +45,7 @@ class ContactViewModel @Inject constructor(
     }
 
 
-    fun getContactById(id : String) {
+    fun getContactById(id: String) {
         viewModelScope.launch {
             contactUseCases.getContactById(id).collect {
                 _contactState.update { state ->
@@ -56,16 +57,28 @@ class ContactViewModel @Inject constructor(
         }
     }
 
-    fun updateContact(contact : Contact) {
+    fun updateContact(contact: Contact) {
         viewModelScope.launch {
             contactUseCases.updateContact(contact)
         }
     }
 
-    fun deleteContact(contact : Contact) {
+    fun deleteContact(contact: Contact) {
         viewModelScope.launch {
             contactUseCases.deleteContact(contact)
         }
 
+    }
+
+    fun updateContactFavorite(isFavorite: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _contactState.value.contact?.let {
+                contactUseCases.updateContact(
+                    contact = it.copy(
+                        isFavorite = isFavorite
+                    )
+                )
+            }
+        }
     }
 }
