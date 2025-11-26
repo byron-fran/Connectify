@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -48,6 +47,7 @@ import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.presentation.navigation.Screens
+import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.RoundedCorner
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.ContactCardModifiers
@@ -59,11 +59,12 @@ import kotlinx.coroutines.withContext
 @Composable
 fun ContactDetailScreen(
     contactId: String?,
+    screenKey: String? = null,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
-    onNavigateTo: (Screens) -> Unit,
-    onNavigate: () -> Unit
+    onNavigateToEdit: (Screens) -> Unit,
+    onNavigateBack: () -> Unit
 
 ) {
 
@@ -82,18 +83,18 @@ fun ContactDetailScreen(
     Scaffold(
         topBar = {
             ConnectifyToAppBar(
-                title = contact?.name ?: "",
+                title = { },
                 actions = {
                     CustomIconButton(
-                        R.drawable.icon_edit,
+                        icon = R.drawable.icon_edit,
                         color = MaterialTheme.colorScheme.onBackground
                     ) {
                         contact?.let {
-                            onNavigateTo(Screens.EditContact(contact.id))
+                            onNavigateToEdit(Screens.EditContact(contact.id))
                         }
                     }
                 }
-            ) { onNavigate() }
+            ) { onNavigateBack() }
         },
         containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier
@@ -110,19 +111,19 @@ fun ContactDetailScreen(
                         imageModifier = Modifier.sharedElement(
                             animatedVisibilityScope = animatedContentScope,
                             sharedContentState = sharedTransitionScope.rememberSharedContentState(
-                                key = SharedTransition.sharedTransitionImageKey(contact.id)
+                                key = SharedTransition.sharedTransitionImageKey(contact.id, screenKey)
                             ),
                         ),
                         textModifier = Modifier.sharedElement(
                             animatedVisibilityScope = animatedContentScope,
                             sharedContentState = sharedTransitionScope.rememberSharedContentState(
-                                key = SharedTransition.sharedTransitionTitleKey(contact.id)
+                                key = SharedTransition.sharedTransitionTitleKey(contact.id, screenKey)
                             ),
                             boundsTransform = { initialBounds, targetBounds ->
                                 keyframes {
-                                    durationMillis = 800
+                                    durationMillis = 500
                                     initialBounds at 0 using ArcMode.ArcBelow using FastOutSlowInEasing
-                                    targetBounds at 800
+                                    targetBounds at 500
                                 }
                             }
                         )
@@ -133,16 +134,28 @@ fun ContactDetailScreen(
                     )
                     ContactDetailBody(
                         contact,
-                        modifier = Modifier.padding(horizontal = Spacing.spacing_sm)
-                    ) {
-                        showDialog = !showDialog
+                        modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
+                        onClickMessage = {
+                            // TODO: add event
+                        },
+                        onClickPhone = {
+                            // TODO: add event
+                        },
+                        onClickEmail = {
+                            // TODO: add event
+                        },
+                        onDelete = {
+                            showDialog = !showDialog
+                        }
+                    ) { isFavorite ->
+                        contactViewModel.updateContactFavorite(isFavorite)
                     }
                 }
                 ContactDeleteDialog(
                     showDialog,
                     onConfirm = {
                         contactViewModel.deleteContact(it)
-                        onNavigate()
+                        onNavigateBack()
                     },
                     onCancel = { showDialog = !showDialog }
                 )
@@ -156,41 +169,43 @@ fun ContactDetailScreen(
 fun ContactDetailBody(
     contact: Contact,
     modifier: Modifier = Modifier,
-    onDelete: () -> Unit
+    onClickMessage: () -> Unit,
+    onClickPhone: () -> Unit,
+    onClickEmail: () -> Unit,
+    onDelete: () -> Unit,
+    onClickFavorite: (Boolean) -> Unit
 ) {
 
     Column(
         verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
         modifier = modifier.background(MaterialTheme.colorScheme.background)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-            BodyLarge(" ")
-            CustomIconButton(R.drawable.icon_star_filled) {
-
-            }
-
+        ContactDataInfo(
+            phoneNumber = contact.phoneNumber.toString(),
+            email = contact.email ?: "",
+            isFavorite = contact.isFavorite,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            onClickFavorite(it)
         }
+        Spacer(modifier = Modifier.height(Spacing.spacing_sm))
         ContactCardAction(
             title = stringResource(R.string.send_message),
             icon = R.drawable.icon_message
         ) {
-
+            onClickMessage()
         }
         ContactCardAction(
             title = stringResource(R.string.call_contact),
             icon = R.drawable.icon_phone
         ) {
-
+            onClickPhone()
         }
         ContactCardAction(
             title = stringResource(R.string.send_email),
             icon = R.drawable.icon_email
         ) {
-
+            onClickEmail()
         }
         Spacer(modifier = Modifier.height(Spacing.spacing_md))
         ButtonError(stringResource(R.string.delete_contact), modifier = Modifier.fillMaxWidth()) {
@@ -208,7 +223,9 @@ fun ContactCardAction(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier.clickable { onClick() }.fillMaxWidth(),
+        modifier = modifier
+            .clickable { onClick() }
+            .fillMaxWidth(),
         shape = RoundedCornerShape(RoundedCorner.rounded_corner_md),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary)
     ) {
@@ -237,14 +254,16 @@ fun ContactDeleteDialog(
     if (showDialog) {
 
         Dialog(onDismissRequest = { onCancel() }) {
-            Box( modifier = Modifier
+            Box(
+                modifier = Modifier
                     .background(
-                        color = Color.Cyan,
+                        color = MaterialTheme.colorScheme.background,
                         shape = RoundedCornerShape(RoundedCorner.rounded_corner_sm)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Column( modifier = Modifier.padding(Spacing.spacing_xl),
+                Column(
+                    modifier = Modifier.padding(Spacing.spacing_xl),
                     verticalArrangement = Arrangement.spacedBy(Spacing.spacing_lg),
                 ) {
                     BodyLarge(stringResource(R.string.confirm_delete_message))
@@ -267,5 +286,74 @@ fun ContactDeleteDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ContactDataInfo(
+    modifier: Modifier = Modifier,
+    email: String = "",
+    phoneNumber: String,
+    isFavorite: Boolean,
+    onClickFavorite: (Boolean) -> Unit
+) {
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md)) {
+                ContactDataInfoChip(phoneNumber, R.drawable.icon_phone)
+                if (email.isNotEmpty()) {
+                    ContactDataInfoChip(email, R.drawable.icon_email)
+                }
+
+            }
+        }
+        if (isFavorite) {
+            CustomIconButton(
+                icon = R.drawable.icon_star_round_filled,
+                size = Card.card_sm,
+                color = MaterialTheme.colorScheme.tertiary
+            ) {
+                onClickFavorite(false)
+            }
+        } else {
+            CustomIconButton(
+                icon = R.drawable.icon_star_outline,
+                size = Card.card_sm,
+                color = MaterialTheme.colorScheme.tertiary
+            ) {
+                onClickFavorite(true)
+            }
+        }
+
+    }
+}
+
+@Composable
+fun ContactDataInfoChip(
+    text: String,
+    icon: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(RoundedCorner.rounded_corner_md)
+            )
+            .padding(Spacing.spacing_md),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CustomIcon(icon, color = MaterialTheme.colorScheme.onSurface)
+        BodyMedium(text, color = MaterialTheme.colorScheme.onSurface)
     }
 }
