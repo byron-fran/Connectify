@@ -18,6 +18,7 @@ import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactList
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
+import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.presentation.navigation.Screens
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.Spacing
@@ -28,48 +29,47 @@ fun ContactScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     contactViewModel: ContactViewModel = hiltViewModel(),
-    onNavigateTo : (Screens) -> Unit,
-    onNavigateToContactDetail: (String) -> Unit
+    onNavigateToDetail: (Screens) -> Unit,
 ) {
     val contacts = contactViewModel.contactState.collectAsState().value.contacts
 
     Scaffold(
         topBar = {
             ConnectifyToAppBar(
-                title = stringResource(R.string.all_contacts),
+                title = { TitleMedium(stringResource(R.string.all_contacts)) },
                 canNavigateBack = false,
-            ) {}
-        },
-        bottomBar = {
-            // TODO: Add bottom bar
+            )   {}
         },
         floatingActionButton = {
             FloatingActionButton(
 
                 onClick = {
-                    onNavigateTo(Screens.AddContact)
+                    onNavigateToDetail(Screens.AddContact)
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 CustomIcon(
                     icon = R.drawable.icon_add,
-                    modifier = Modifier.size(  Card.card_sm),
+                    modifier = Modifier.size(Card.card_sm),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)
+        Column(
+            modifier = Modifier.padding(paddingValues)
         ) {
             ContactList(
                 contacts = contacts,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedContentScope = animatedContentScope,
-                modifier = Modifier.padding(horizontal = Spacing.spacing_sm)
+                modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
+                enableSharedTransitions = true,
+                screenKey = "contacts"
             ) {
-                onNavigateToContactDetail(it)
+                onNavigateToDetail(Screens.ContactDetail(it, "contacts"))
             }
         }
     }
