@@ -1,6 +1,5 @@
 package com.example.connectify.presentation.components.global
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,18 +13,14 @@ import com.example.connectify.ui.theme.Card
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConnectifyToAppBar(
-    title: String,
+    title : @Composable () -> Unit,
     canNavigateBack: Boolean = true,
     actions: @Composable (RowScope.() -> Unit) = {},
     onNavigate: () -> Unit
 ) {
 
     CenterAlignedTopAppBar(
-        title = {
-            AnimatedVisibility(true) {
-                TitleMedium(text = title)
-            }
-        },
+        title = title,
         navigationIcon = {
             if (canNavigateBack) {
                 CustomIconButton(
