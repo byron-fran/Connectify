@@ -16,4 +16,12 @@
     <string name="confirm_delete">Si, eliminar</string>
     <string name="cancel">Cancelar</string>
     <string name="confirm_delete_message">Estas seguro de eliminar este contacto ?</string>
+    <string name="contacts">Contactos</string>
+    <string name="favorites">Favoritos</string>
+    <string name="search">Buscar</string>
+    <string name="settings">Ajustes</string>
+    <string name="contact_information">Información del contacto</string>
+    <string name="successful_update">Se actualizo correctamente</string>
+    <string name="no_results">No hay resultados</string>
+    <string name="search_contacts">Buscar contactos</string>
 </resources>
