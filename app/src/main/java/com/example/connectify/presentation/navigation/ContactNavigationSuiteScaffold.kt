@@ -119,7 +119,7 @@ fun ContactNavigationSuiteScaffold(
                 )
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background,
         navigationSuiteColors = NavigationSuiteDefaults.colors(
             navigationBarContainerColor = MaterialTheme.colorScheme.surface,
             navigationRailContainerColor = MaterialTheme.colorScheme.surface,
