@@ -23,6 +23,8 @@ fun ContactList(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     modifier: Modifier = Modifier,
+    enableSharedTransitions: Boolean = true,
+    screenKey: String? = null,
     onNavigateToContactDetail: (String) -> Unit
 ) {
 
@@ -33,27 +35,31 @@ fun ContactList(
         ) {
             items(contacts) { contact ->
 
-                val contactModifier = ContactCardModifiers(
-                    imageModifier = Modifier.sharedElement(
-                        animatedVisibilityScope = animatedContentScope,
-                        sharedContentState = sharedTransitionScope.rememberSharedContentState(
-                            key = SharedTransition.sharedTransitionImageKey(contact.id)
+                val contactModifier = if (enableSharedTransitions) {
+                    ContactCardModifiers(
+                        imageModifier = Modifier.sharedElement(
+                            animatedVisibilityScope = animatedContentScope,
+                            sharedContentState = sharedTransitionScope.rememberSharedContentState(
+                                key = SharedTransition.sharedTransitionImageKey(contact.id, screenKey)
+                            ),
                         ),
-                    ),
-                    textModifier = Modifier.sharedElement(
-                        animatedVisibilityScope = animatedContentScope,
-                        sharedContentState = sharedTransitionScope.rememberSharedContentState(
-                            key = SharedTransition.sharedTransitionTitleKey(contact.id)
-                        ),
-                        boundsTransform = { initialBounds, targetBounds ->
-                            keyframes {
-                                durationMillis = 800
-                                initialBounds at 0 using ArcMode.ArcBelow using FastOutSlowInEasing
-                                targetBounds at 800
+                        textModifier = Modifier.sharedElement(
+                            animatedVisibilityScope = animatedContentScope,
+                            sharedContentState = sharedTransitionScope.rememberSharedContentState(
+                                key = SharedTransition.sharedTransitionTitleKey(contact.id, screenKey)
+                            ),
+                            boundsTransform = { initialBounds, targetBounds ->
+                                keyframes {
+                                    durationMillis = 800
+                                    initialBounds at 0 using ArcMode.ArcBelow using FastOutSlowInEasing
+                                    targetBounds at 800
+                                }
                             }
-                        }
+                        )
                     )
-                )
+                } else {
+                    ContactCardModifiers()
+                }
                 ContactCard(
                     contact = contact,
                     modifiers = contactModifier
