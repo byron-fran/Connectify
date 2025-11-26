@@ -10,11 +10,15 @@ sealed class Screens {
     object Contacts : Screens()
 
     @Serializable
-    data class ContactDetail(val contactId : String) : Screens()
+    data class ContactDetail(val contactId : String, val screenKey: String? = null) : Screens()
 
     @Serializable
     object AddContact : Screens()
 
     @Serializable
     data class EditContact(val contactId : String?) : Screens()
+
+    @Serializable
+    object Favorites : Screens()
+
 }
