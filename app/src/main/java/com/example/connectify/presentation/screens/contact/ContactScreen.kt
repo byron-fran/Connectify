@@ -38,7 +38,7 @@ fun ContactScreen(
             ConnectifyToAppBar(
                 title = { TitleMedium(stringResource(R.string.all_contacts)) },
                 canNavigateBack = false,
-            )   {}
+            ) {}
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -67,9 +67,16 @@ fun ContactScreen(
                 animatedContentScope = animatedContentScope,
                 modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
                 enableSharedTransitions = true,
-                screenKey = "contacts"
-            ) {
-                onNavigateToDetail(Screens.ContactDetail(it, "contacts"))
+                screenKey = "contacts",
+                onChangeFavorite = { contact ->
+                    contactViewModel.updateContact(
+                        contact.copy(
+                            isFavorite = !contact.isFavorite
+                        )
+                    )
+                }
+            ) { contactId ->
+                onNavigateToDetail(Screens.ContactDetail (contactId, "contacts"))
             }
         }
     }
