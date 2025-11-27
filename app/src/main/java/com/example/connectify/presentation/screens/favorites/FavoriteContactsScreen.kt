@@ -26,11 +26,11 @@ fun FavoriteContactsScreen(
     animatedContentScope: AnimatedContentScope,
     contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
     onNavigateBack: () -> Unit,
-    onNavigateToDetail : (Screens) -> Unit
+    onNavigateToDetail: (Screens) -> Unit
 ) {
 
     val favoritesContact = contactViewModel.contactState.collectAsState().value.contacts
-    
+
     Scaffold(
         topBar = {
             ConnectifyToAppBar(
@@ -42,14 +42,21 @@ fun FavoriteContactsScreen(
             }
         }
     ) { paddingValues ->
-        Column( modifier = Modifier.padding(paddingValues)) {
+        Column(modifier = Modifier.padding(paddingValues)) {
             ContactList(
                 contacts = favoritesContact.filter { it.isFavorite },
                 sharedTransitionScope = sharedTransitionScope,
                 animatedContentScope = animatedContentScope,
                 modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
                 enableSharedTransitions = true,
-                screenKey = "favorites"
+                screenKey = "favorites",
+                onChangeFavorite = { contact ->
+                    contactViewModel.updateContact(
+                        contact.copy(
+                            isFavorite = !contact.isFavorite
+                        )
+                    )
+                }
             ) {
                 onNavigateToDetail(Screens.ContactDetail(it, "favorites"))
             }
