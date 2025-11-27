@@ -27,6 +27,7 @@ import com.example.connectify.presentation.components.contact.ContactList
 import com.example.connectify.presentation.components.global.BodyLarge
 import com.example.connectify.presentation.components.search.ConnectifySearchBar
 import com.example.connectify.presentation.navigation.Screens
+import com.example.connectify.presentation.screens.contact.ContactViewModel
 import com.example.connectify.ui.theme.Spacing
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -35,6 +36,7 @@ fun SearchScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     searchViewModel: SearchViewModel = hiltViewModel<SearchViewModel>(),
+    contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
     onNavigationToDetail: (Screens) -> Unit
 ) {
 
@@ -75,7 +77,14 @@ fun SearchScreen(
                         sharedTransitionScope = sharedTransitionScope,
                         animatedContentScope = animatedContentScope,
                         enableSharedTransitions = true,
-                        screenKey = "search"
+                        screenKey = "search",
+                        onChangeFavorite = { contact ->
+                            contactViewModel.updateContact(
+                                contact.copy(
+                                    isFavorite = !contact.isFavorite
+                                )
+                            )
+                        }
                     ) {
                         onNavigationToDetail(Screens.ContactDetail(it, "search"))
                     }
