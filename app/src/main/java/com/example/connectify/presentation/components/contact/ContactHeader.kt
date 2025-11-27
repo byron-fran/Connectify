@@ -11,8 +11,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.presentation.components.global.BoxCircle
 import com.example.connectify.presentation.components.global.ContactImage
@@ -57,7 +59,8 @@ fun ContactHeader(
                     content = {
                         TitleLarge(
                             text = contact.name.first().toString().uppercase(),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.zIndex(1f)
                         )
                     }
                 )
