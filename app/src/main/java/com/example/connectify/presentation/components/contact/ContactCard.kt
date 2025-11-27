@@ -2,7 +2,6 @@ package com.example.connectify.presentation.components.contact
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,21 +14,18 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.presentation.components.global.BodyLarge
 import com.example.connectify.presentation.components.global.BodySmall
 import com.example.connectify.presentation.components.global.BoxCircle
-import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.ContactImage
+import com.example.connectify.presentation.components.global.CustomIcon
+import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.ContactCardModifiers
@@ -38,9 +34,9 @@ import com.example.connectify.utils.ContactCardModifiers
 fun ContactCard(
     contact: Contact,
     modifiers: ContactCardModifiers = ContactCardModifiers(),
+    onChangeFavorite: () -> Unit,
     onNavigate: () -> Unit,
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -50,90 +46,93 @@ fun ContactCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        onClick = { isExpanded = !isExpanded }
+        onClick = onNavigate
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
-            verticalAlignment = Alignment.Top,
-            modifier = Modifier.padding(vertical = Spacing.spacing_sm)
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            ContactImage(
-                uri = contact.imageUrl,
-                modifier = modifiers.imageModifier
-                    .clickable { onNavigate() }
-                    .clip(CircleShape)
-                    .size(Card.card_md)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier
+                    .padding(vertical = Spacing.spacing_sm)
+                    .weight(1f)
             ) {
-                BoxCircle(
+
+                ContactImage(
+                    uri = contact.imageUrl,
                     modifier = modifiers.imageModifier
-                        .background(
-                            shape = CircleShape,
-                            color = contact.colorDefault
-                        )
+                        .clip(CircleShape)
                         .size(Card.card_md)
-                        .clickable { onNavigate() },
-                    content = {
-                        BodyLarge(
-                            text = contact.name.first().toString().uppercase(),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                        )
-                    }
-                )
-            }
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(Spacing.spacing_xs)
-            ) {
-                BodyLarge(
-                    text = contact.name,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = modifiers.textModifier
-
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    BoxCircle(
+                        modifier = modifiers.imageModifier
+                            .background(
+                                shape = CircleShape,
+                                color = contact.colorDefault.copy(alpha = 0.6f),
+                            )
+                            .size(Card.card_md),
+                        content = {
+                            BodyLarge(
+                                text = contact.name.first().toString().uppercase(),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.zIndex(1f)
+                            )
+                        }
+                    )
+                }
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(Spacing.spacing_xs)
+                ) {
+                    BodyLarge(
+                        text = contact.name,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = modifiers.textModifier
+
+                    )
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_sm)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        BodySmall(
-                            text = contact.phoneNumber.toString(),
-                            color = MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.7f
-                            )
-                        )
-                        if (!contact.email.isNullOrBlank()) {
-                            CustomIcon(
-                                icon = R.drawable.icon_circle,
-                                modifier = Modifier.size(4.dp),
-                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.7f
-                                )
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_sm)
+                        ) {
                             BodySmall(
-                                text = contact.email ?: "",
+                                text = contact.phoneNumber.toString(),
                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                     alpha = 0.7f
                                 )
                             )
+                            if (!contact.email.isNullOrBlank()) {
+                                CustomIcon(
+                                    icon = R.drawable.icon_circle,
+                                    modifier = Modifier.size(Spacing.spacing_sm),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.7f
+                                    )
+                                )
+                                BodySmall(
+                                    text = contact.email ?: "",
+                                    color = MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.7f
+                                    )
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-
-        if (isExpanded) {
-            ContactOptions(
-                onClickMessage = { /*TODO*/ },
-                onClickPhone = { /*TODO*/ },
-                onClickEmail = { /*TODO*/ },
-                onClickShare = { /*TODO*/ },
-                modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.spacing_md)
-            )
+            CustomIconButton(
+                icon = if (contact.isFavorite) R.drawable.icon_star_round_filled else R.drawable.icon_star_outline,
+                size = Card.card_sm,
+                color = MaterialTheme.colorScheme.tertiary
+            ) {
+                onChangeFavorite()
+            }
         }
     }
 }
