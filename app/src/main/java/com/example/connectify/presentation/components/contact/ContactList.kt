@@ -25,6 +25,7 @@ fun ContactList(
     modifier: Modifier = Modifier,
     enableSharedTransitions: Boolean = true,
     screenKey: String? = null,
+    onChangeFavorite: (Contact) -> Unit,
     onNavigateToContactDetail: (String) -> Unit
 ) {
 
@@ -40,13 +41,19 @@ fun ContactList(
                         imageModifier = Modifier.sharedElement(
                             animatedVisibilityScope = animatedContentScope,
                             sharedContentState = sharedTransitionScope.rememberSharedContentState(
-                                key = SharedTransition.sharedTransitionImageKey(contact.id, screenKey)
+                                key = SharedTransition.sharedTransitionImageKey(
+                                    contact.id,
+                                    screenKey
+                                )
                             ),
                         ),
                         textModifier = Modifier.sharedElement(
                             animatedVisibilityScope = animatedContentScope,
                             sharedContentState = sharedTransitionScope.rememberSharedContentState(
-                                key = SharedTransition.sharedTransitionTitleKey(contact.id, screenKey)
+                                key = SharedTransition.sharedTransitionTitleKey(
+                                    contact.id,
+                                    screenKey
+                                )
                             ),
                             boundsTransform = { initialBounds, targetBounds ->
                                 keyframes {
@@ -62,7 +69,8 @@ fun ContactList(
                 }
                 ContactCard(
                     contact = contact,
-                    modifiers = contactModifier
+                    modifiers = contactModifier,
+                    onChangeFavorite = { onChangeFavorite(contact) },
                 ) {
                     onNavigateToContactDetail(contact.id)
                 }
