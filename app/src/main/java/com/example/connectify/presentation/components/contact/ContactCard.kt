@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
@@ -35,6 +36,7 @@ fun ContactCard(
     contact: Contact,
     modifiers: ContactCardModifiers = ContactCardModifiers(),
     onChangeFavorite: () -> Unit,
+    onChangeModalBottonSheet: () -> Unit,
     onNavigate: () -> Unit,
 ) {
 
@@ -126,12 +128,24 @@ fun ContactCard(
                     }
                 }
             }
-            CustomIconButton(
-                icon = if (contact.isFavorite) R.drawable.icon_star_round_filled else R.drawable.icon_star_outline,
-                size = Card.card_sm,
-                color = MaterialTheme.colorScheme.tertiary
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                onChangeFavorite()
+
+                CustomIconButton(
+                    icon = if (contact.isFavorite) R.drawable.icon_star_round_filled else R.drawable.icon_star_outline,
+                    size = Card.card_sm,
+                    color = MaterialTheme.colorScheme.tertiary
+                ) {
+                    onChangeFavorite()
+                }
+                CustomIconButton(
+                    icon = R.drawable.icon_more_vert,
+                    color = MaterialTheme.colorScheme.onBackground
+                ) {
+                    onChangeModalBottonSheet()
+                }
             }
         }
     }
