@@ -16,15 +16,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
-        val navController = rememberNavController()
+            val navHostController = rememberNavController()
+
             ConnectifyTheme {
                 ContactNavigationSuiteScaffold(
-                    onNavigateTo = {
-                        navController.navigate(it)
-                    }
+                    navHostController
                 ) {
-                   NavHostManager(navController)
+                    NavHostManager(navHostController)
                 }
             }
         }
