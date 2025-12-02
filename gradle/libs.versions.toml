@@ -26,6 +26,10 @@ kotlinSerialization = "2.2.20"
 # kotlin serialization json
 kotlinSerializationJson = "1.7.3"
 volley = "1.2.1"
+datastoreCore = "1.2.0"
+datastorePreferencesCore = "1.2.0"
+
+splashscreen = "1.0.1"
 
 
 [libraries]
@@ -63,6 +67,9 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 # Kotlin serialization JSON
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerializationJson" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastoreCore" }
+androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastorePreferencesCore" }
+androidx-splashcreen = {module="androidx.core:core-splashscreen", version.ref ="splashscreen" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.volley)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.datastore.preferences.core)
     ksp(libs.androidx.room.compiler)
     // material3 adaptive
     implementation(libs.androidx.window)
@@ -72,6 +74,8 @@ dependencies {
     // kotlin serialization JSON
     implementation(libs.kotlin.serialization.json)
 
+    // splashscreen
+    implementation(libs.androidx.splashcreen)
     // Room testing
     testImplementation(libs.androidx.room.testing)
 
