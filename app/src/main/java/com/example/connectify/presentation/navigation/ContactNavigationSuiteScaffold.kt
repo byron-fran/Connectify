@@ -2,8 +2,11 @@ package com.example.connectify.presentation.navigation
 
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationDrawerItemColors
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.NavigationRailItemColors
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
@@ -14,14 +17,13 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.connectify.R
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.LabelSmall
@@ -34,10 +36,19 @@ data class NavItem(
 
 @Composable
 fun ContactNavigationSuiteScaffold(
-    onNavigateTo: (Screens) -> Unit,
+    navHostController: NavHostController,
     content: @Composable () -> Unit
 ) {
-    var selectDestination: Screens by remember { mutableStateOf(Screens.Contacts) }
+
+    val navBackStackEntry by navHostController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    val selectDestination: Screens = when (currentDestination?.route) {
+        Screens.Contacts::class.qualifiedName -> Screens.Contacts
+        Screens.Favorites::class.qualifiedName -> Screens.Favorites
+        Screens.Search::class.qualifiedName -> Screens.Search
+        else -> Screens.Contacts
+    }
 
     val navigationItems = listOf(
         NavItem(
@@ -58,6 +69,10 @@ fun ContactNavigationSuiteScaffold(
 
     )
 
+    val navItemColors = NavigationBarColors()
+    val navigationRailItemColors = NavigationRailColors()
+    val navigationDrawerItemColors = NavigationDrawerColors()
+
     val windowSize = with(LocalDensity.current) {
         currentWindowSize().toSize().toDpSize()
     }
@@ -66,34 +81,9 @@ fun ContactNavigationSuiteScaffold(
         NavigationSuiteType.NavigationDrawer
     } else {
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
-            currentWindowAdaptiveInfo()
+            adaptiveInfo = currentWindowAdaptiveInfo()
         )
     }
-
-    val navItemColors = NavigationBarItemDefaults.colors(
-        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
-        indicatorColor = MaterialTheme.colorScheme.secondary,
-        unselectedIconColor = MaterialTheme.colorScheme.onSurface,
-        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-    )
-    val navigationRailItemColors = NavigationRailItemDefaults.colors(
-        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
-        indicatorColor = MaterialTheme.colorScheme.secondary,
-        unselectedIconColor = MaterialTheme.colorScheme.onSurface,
-        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-
-        )
-    val navigationDrawerItemColors = NavigationDrawerItemDefaults.colors(
-        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
-        unselectedIconColor = MaterialTheme.colorScheme.onSurface,
-        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-        selectedBadgeColor = MaterialTheme.colorScheme.secondary,
-        unselectedBadgeColor = MaterialTheme.colorScheme.onSurface,
-        selectedContainerColor = MaterialTheme.colorScheme.secondary
-    )
 
     NavigationSuiteScaffold(
         layoutType = layoutType,
@@ -102,8 +92,7 @@ fun ContactNavigationSuiteScaffold(
                 item(
                     selected = it.screen == selectDestination,
                     onClick = {
-                        selectDestination = it.screen
-                        onNavigateTo(it.screen)
+                        navHostController.navigateSingleBottomTo(it.screen::class.qualifiedName!!)
                     },
                     icon = {
                         CustomIcon(icon = it.icon, color = LocalContentColor.current)
@@ -128,4 +117,42 @@ fun ContactNavigationSuiteScaffold(
     ) {
         content()
     }
+}
+
+@Composable
+fun NavigationBarColors() : NavigationBarItemColors {
+
+    return NavigationBarItemDefaults.colors(
+        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
+        indicatorColor = MaterialTheme.colorScheme.secondary,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurface
+
+    )
+}
+
+@Composable
+fun NavigationRailColors() : NavigationRailItemColors {
+    return NavigationRailItemDefaults.colors(
+        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
+        indicatorColor = MaterialTheme.colorScheme.secondary,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+fun NavigationDrawerColors() : NavigationDrawerItemColors {
+
+    return NavigationDrawerItemDefaults.colors(
+        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+        selectedBadgeColor = MaterialTheme.colorScheme.secondary,
+        unselectedBadgeColor = MaterialTheme.colorScheme.onSurface,
+        selectedContainerColor = MaterialTheme.colorScheme.secondary
+    )
 }
