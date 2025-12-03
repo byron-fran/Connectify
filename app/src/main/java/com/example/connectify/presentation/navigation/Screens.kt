@@ -21,4 +21,9 @@ sealed class Screens {
     @Serializable
     object Favorites : Screens()
 
+    @Serializable
+    object Settings : Screens()
+
+    @Serializable
+    object Theme : Screens()
 }

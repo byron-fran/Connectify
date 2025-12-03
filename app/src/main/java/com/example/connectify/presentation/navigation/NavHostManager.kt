@@ -12,26 +12,30 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.connectify.presentation.screens.settings.SettingsScreen
 import com.example.connectify.presentation.screens.contact.AddContactScreen
 import com.example.connectify.presentation.screens.contact.ContactDetailScreen
 import com.example.connectify.presentation.screens.contact.ContactEditScreen
 import com.example.connectify.presentation.screens.contact.ContactScreen
 import com.example.connectify.presentation.screens.favorites.FavoriteContactsScreen
 import com.example.connectify.presentation.screens.search.SearchScreen
+import com.example.connectify.presentation.screens.theme.ThemeScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun NavHostManager(
-    navController: NavHostController,
+    navHostController: NavHostController,
 ) {
 
     SharedTransitionLayout {
 
         NavHost(
-            navController = navController,
+            navController = navHostController,
             startDestination = Screens.Contacts
         ) {
 
@@ -40,7 +44,7 @@ fun NavHostManager(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedContentScope = this@composable,
                 ) { route ->
-                    navController.navigate(route)
+                    navHostController.navigate(route)
                 }
             }
             composable<Screens.ContactDetail> { navBackStackEntry ->
@@ -54,27 +58,27 @@ fun NavHostManager(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedContentScope = this@composable,
                     onNavigateToEdit = {
-                        navController.navigate(Screens.EditContact(contactId))
+                        navHostController.navigate(Screens.EditContact(contactId))
                     }
 
                 ) {
-                    navController.popBackStack()
+                    navHostController.popBackStack()
                 }
             }
             composable<Screens.AddContact> {
                 AddContactScreen(
                     onNavigateTo = { route ->
-                        navController.navigate(route)
+                        navHostController.navigate(route)
                     },
                     onNavigateBack = {
-                        navController.popBackStack()
+                        navHostController.popBackStack()
                     }
                 )
             }
             composable<Screens.EditContact> { navBackStackEntry ->
                 val contactId = navBackStackEntry.arguments?.getString("contactId")
                 ContactEditScreen(contactId) {
-                    navController.popBackStack()
+                    navHostController.popBackStack()
                 }
             }
             composable<Screens.Search>(
@@ -85,10 +89,10 @@ fun NavHostManager(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedContentScope = this@composable,
                 ) { route ->
-                    navController.navigate(route)
+                    navHostController.navigate(route)
                 }
             }
-            composable<Screens.Favorites> (
+            composable<Screens.Favorites>(
                 enterTransition = { enterAnimation() },
                 exitTransition = { exitAnimation() }
             ) {
@@ -96,17 +100,42 @@ fun NavHostManager(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedContentScope = this@composable,
                     onNavigateBack = {
-                        navController.popBackStack()
+                        navHostController.popBackStack()
                     },
                     onNavigateToDetail = { route ->
-                        navController.navigate(route)
+                        navHostController.navigate(route)
                     }
                 )
             }
-
+            composable<Screens.Settings> {
+                SettingsScreen(
+                    onNavigateTo = { route ->
+                        navHostController.navigate(route)
+                    }
+                ) {
+                    navHostController.popBackStack()
+                }
+            }
+            composable<Screens.Theme> {
+                ThemeScreen() {
+                    navHostController.popBackStack()
+                }
+            }
         }
     }
 }
+
+fun NavController.navigateSingleBottomTo(screen: String) {
+
+    this.navigate(screen) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = false
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
 
 fun enterAnimation(): EnterTransition {
     return slideInHorizontally(
