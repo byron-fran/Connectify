@@ -18,6 +18,7 @@ import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactList
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
+import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.presentation.navigation.Screens
 import com.example.connectify.ui.theme.Card
@@ -29,7 +30,7 @@ fun ContactScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     contactViewModel: ContactViewModel = hiltViewModel(),
-    onNavigateToDetail: (Screens) -> Unit,
+    onNavigateTo: (Screens) -> Unit,
 ) {
     val contacts = contactViewModel.contactState.collectAsState().value.contacts
 
@@ -38,13 +39,22 @@ fun ContactScreen(
             ConnectifyToAppBar(
                 title = { TitleMedium(stringResource(R.string.all_contacts)) },
                 canNavigateBack = false,
-            ) {}
+                actions = {
+                    CustomIconButton(
+                        icon = R.drawable.icon_settings,
+                        color = MaterialTheme.colorScheme.onBackground
+                    ) {
+                        onNavigateTo(Screens.Settings)
+                    }
+                }
+            ) {
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
 
                 onClick = {
-                    onNavigateToDetail(Screens.AddContact)
+                    onNavigateTo(Screens.AddContact)
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -76,7 +86,7 @@ fun ContactScreen(
                     )
                 }
             ) { contactId ->
-                onNavigateToDetail(Screens.ContactDetail (contactId, "contacts"))
+                onNavigateTo(Screens.ContactDetail(contactId, "contacts"))
             }
         }
     }
