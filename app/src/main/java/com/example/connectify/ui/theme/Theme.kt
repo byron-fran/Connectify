@@ -1,16 +1,20 @@
 package com.example.connectify.ui.theme
 
+import android.content.res.Configuration
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.connectify.presentation.screens.theme.ThemeViewModel
+import com.example.connectify.utils.ThemeMode
 
 
 private val DarkColorScheme = darkColorScheme(
@@ -43,18 +47,30 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun ConnectifyTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    themeViewModel : ThemeViewModel = hiltViewModel(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+
+    val themeMode by themeViewModel.themeMode.collectAsState()
+    val configuration = LocalConfiguration.current
+
+    val isDark = when (themeMode) {
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+        ThemeMode.FOLLOW_SYSTEM -> {
+            (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                    Configuration.UI_MODE_NIGHT_YES
+        }
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
+        isDark -> DarkColorScheme
         else -> LightColorScheme
     }
 
