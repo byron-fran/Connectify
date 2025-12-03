@@ -23,4 +23,8 @@
     <string name="successful_update">Successful updated</string>
     <string name="no_results">No results</string>
     <string name="search_contacts">Search contacts</string>
+    <string name="dark_mode">Dark</string>
+    <string name="light_mode">Light</string>
+    <string name="system_mode_default">System default</string>
+    <string name="theme">Themes</string>
 </resources>
