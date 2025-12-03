@@ -31,6 +31,8 @@ datastorePreferencesCore = "1.2.0"
 
 splashscreen = "1.0.1"
 
+material = "1.13.0-alpha08"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -70,6 +72,9 @@ volley = { group = "com.android.volley", name = "volley", version.ref = "volley"
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastoreCore" }
 androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastorePreferencesCore" }
 androidx-splashcreen = {module="androidx.core:core-splashscreen", version.ref ="splashscreen" }
+
+# Material Components / Material3 clásico (no Compose)
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

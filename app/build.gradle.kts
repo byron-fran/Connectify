@@ -59,6 +59,10 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.datastore.preferences.core)
     ksp(libs.androidx.room.compiler)
+
+    // Material clásico (views / temas XML, incluye Theme.Material3.*)
+    implementation(libs.google.material)
+
     // material3 adaptive
     implementation(libs.androidx.window)
     implementation(libs.androidx.material3.adaptive)
