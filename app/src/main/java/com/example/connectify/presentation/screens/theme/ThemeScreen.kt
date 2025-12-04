@@ -1,14 +1,13 @@
 package com.example.connectify.presentation.screens.theme
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -19,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.global.BodyLarge
@@ -50,7 +48,8 @@ fun ThemeScreen(
         Column(modifier = Modifier.padding(paddingValues)) {
 
             Column(
-                modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
+                modifier = Modifier
+                    .padding(horizontal = Spacing.spacing_sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md)
             ) {
                 ThemeModeOption(
@@ -73,6 +72,7 @@ fun ThemeScreen(
     }
 
 }
+
 @Composable
 fun ThemeModeOption(
     mode: ThemeMode,
@@ -86,71 +86,41 @@ fun ThemeModeOption(
         ThemeMode.LIGHT -> stringResource(R.string.light_mode) to R.drawable.icon_light_mode
         ThemeMode.FOLLOW_SYSTEM -> stringResource(R.string.system_mode_default) to R.drawable.icon_mobile_hand
     }
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Spacing.spacing_md),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        onClick = { onClick() }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(Spacing.spacing_md)
+            )
+            .padding(vertical = Spacing.spacing_md)
+            .clickable {
+                onClick()
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Spacing.spacing_md)
-            ,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_sm),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CustomIcon(
-                    icon = icon,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                )
-                BodyLarge(
-                    text = title,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                )
-            }
-            RadioButton(
-                selected = selected,
-                onClick = null,
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.colorScheme.primary,
-                    unselectedColor = MaterialTheme.colorScheme.onBackground
-                )
+            CustomIcon(
+                icon = icon,
+                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+            )
+            BodyLarge(
+                text = title,
+                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
             )
         }
-    }
-
-}
-
-@Preview
-@Composable
-fun ThemeModeOptionPreview() {
-    Column(
-        modifier = Modifier.padding(horizontal = Spacing.spacing_sm).background(MaterialTheme.colorScheme.primary),
-        verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
-
-    ) {
-
-        ThemeModeOption(
-            mode = ThemeMode.FOLLOW_SYSTEM,
-            selected = true,
-            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-        ) { }
-        ThemeModeOption(
-            mode = ThemeMode.FOLLOW_SYSTEM,
-            selected = true,
-            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-        ) { }
-        ThemeModeOption(
-            mode = ThemeMode.FOLLOW_SYSTEM,
-            selected = true,
-            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-        ) { }
+        RadioButton(
+            selected = selected,
+            onClick = null,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.colorScheme.primary,
+                unselectedColor = MaterialTheme.colorScheme.onBackground
+            )
+        )
     }
 }
