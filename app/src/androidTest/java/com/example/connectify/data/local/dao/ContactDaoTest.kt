@@ -39,11 +39,11 @@ class ContactDaoTest {
     private lateinit var contactDao: ContactDao
     private lateinit var connectifyDatabase: ConnectifyDatabase
 
-    suspend fun addOneContact() {
+    private suspend fun addOneContact() {
         contactDao.insertContact(contact1)
     }
 
-    suspend fun addTwoContacts() {
+    private suspend fun addTwoContacts() {
         contactDao.insertContact(contact1)
         contactDao.insertContact(contact2)
     }
@@ -76,7 +76,8 @@ class ContactDaoTest {
         addOneContact()
         val allContacts = contactDao.getAllContacts().first()
 
-        assertEquals(allContacts[0], contact1)
+        assertEquals(1, allContacts.size)
+        assertEquals(contact1, allContacts[0])
     }
 
     @Test
@@ -86,8 +87,9 @@ class ContactDaoTest {
         addTwoContacts()
         val allContacts = contactDao.getAllContacts().first()
 
-        assertEquals(allContacts[0], contact1)
-        assertEquals(allContacts[1], contact2)
+        assertEquals(2, allContacts.size)
+        assertEquals(contact1, allContacts[0])
+        assertEquals(contact2, allContacts[1])
     }
 
     @Test
@@ -95,12 +97,21 @@ class ContactDaoTest {
     fun daoUpdateContacts_updatesContactsInDB() = runBlocking {
 
         addTwoContacts()
-        contactDao.updateContact( ContactEntity( id = contactId1, name = "Byron Chanax"))
-        contactDao.updateContact(ContactEntity(id = contactId2, name = "Francisco Itzep"))
+        
+        val updatedContact1 = contact1.copy(name = "Byron Chanax")
+        val updatedContact2 = contact2.copy(name = "Francisco Itzep")
+        
+        contactDao.updateContact(updatedContact1)
+        contactDao.updateContact(updatedContact2)
 
         val allContacts = contactDao.getAllContacts().first()
-        assertEquals(allContacts[0], ContactEntity(id = contactId1, name = "Byron Chanax"))
-        assertEquals(allContacts[1], ContactEntity(id = contactId2, name = "Francisco Itzep"))
+        assertEquals(2, allContacts.size)
+        assertEquals(updatedContact1, allContacts.find { it.id == contactId1 })
+        assertEquals(updatedContact2, allContacts.find { it.id == contactId2 })
+        
+        val retrievedContact1 = allContacts.find { it.id == contactId1 }
+        assertEquals(contact1.phoneNumber, retrievedContact1?.phoneNumber)
+        assertEquals(contact1.email, retrievedContact1?.email)
     }
 
     @Test
@@ -123,6 +134,16 @@ class ContactDaoTest {
 
         addOneContact()
         val contact = contactDao.getContactById(contactId1).first()
-        assertEquals(contact, contact1)
+        
+        assertEquals(contact1, contact)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun daoGetContact_returnsNullWhenContactNotFound() = runBlocking {
+        val nonExistentId = UUID.randomUUID().toString()
+        val contact = contactDao.getContactById(nonExistentId).first()
+        
+        assertEquals(null, contact)
     }
 }
