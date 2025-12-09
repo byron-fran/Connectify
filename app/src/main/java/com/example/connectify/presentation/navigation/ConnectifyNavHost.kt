@@ -28,7 +28,7 @@ import com.example.connectify.presentation.screens.theme.ThemeScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun NavHostManager(
+fun ConnectifyNavHost(
     navHostController: NavHostController,
 ) {
 
