@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
@@ -34,14 +33,16 @@ import com.example.connectify.utils.ContactCardModifiers
 @Composable
 fun ContactCard(
     contact: Contact,
+    togglingFavoriteId: String?,
+    modifier: Modifier = Modifier,
     modifiers: ContactCardModifiers = ContactCardModifiers(),
-    onChangeFavorite: () -> Unit,
+    onFavoriteToggle: (Contact) -> Unit,
     onChangeModalBottonSheet: () -> Unit,
     onNavigate: () -> Unit,
 ) {
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .animateContentSize(),
         shape = RoundedCornerShape(Spacing.spacing_md),
@@ -54,99 +55,142 @@ fun ContactCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier
-                    .padding(vertical = Spacing.spacing_sm)
-                    .weight(1f)
-            ) {
-
-                ContactImage(
-                    uri = contact.imageUrl,
-                    modifier = modifiers.imageModifier
-                        .clip(CircleShape)
-                        .size(Card.card_md)
-                ) {
-                    BoxCircle(
-                        modifier = modifiers.imageModifier
-                            .background(
-                                shape = CircleShape,
-                                color = contact.colorDefault.copy(alpha = 0.6f),
-                            )
-                            .size(Card.card_md),
-                        content = {
-                            BodyLarge(
-                                text = contact.name.first().toString().uppercase(),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.zIndex(1f)
-                            )
-                        }
-                    )
-                }
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(Spacing.spacing_xs)
-                ) {
-                    BodyLarge(
-                        text = contact.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = modifiers.textModifier
-
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_sm)
-                        ) {
-                            BodySmall(
-                                text = contact.phoneNumber.toString(),
-                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.7f
-                                )
-                            )
-                            if (!contact.email.isNullOrBlank()) {
-                                CustomIcon(
-                                    icon = R.drawable.icon_circle,
-                                    modifier = Modifier.size(Spacing.spacing_sm),
-                                    color = MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = 0.7f
-                                    )
-                                )
-                                BodySmall(
-                                    text = contact.email ?: "",
-                                    color = MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = 0.7f
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                CustomIconButton(
-                    icon = if (contact.isFavorite) R.drawable.icon_star_round_filled else R.drawable.icon_star_outline,
-                    size = Card.card_sm,
-                    color = MaterialTheme.colorScheme.tertiary
-                ) {
-                    onChangeFavorite()
-                }
-                CustomIconButton(
-                    icon = R.drawable.icon_more_vert,
-                    color = MaterialTheme.colorScheme.onBackground
-                ) {
+            ContactInfoSection(
+                contact,
+                modifiers,
+                modifier.weight(1f)
+            )
+            ContactActionsSection(
+                contactId = contact.id,
+                isFavorite = contact.isFavorite,
+                togglingFavoriteId = togglingFavoriteId,
+                onFavoriteToggle = {
+                    onFavoriteToggle(contact)
+                },
+                onShowMoreOptions = {
                     onChangeModalBottonSheet()
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContactInfoSection(
+    contact: Contact,
+    modifiers: ContactCardModifiers,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+        verticalAlignment = Alignment.Top,
+        modifier = modifier.padding(vertical = Spacing.spacing_sm)
+    ) {
+
+        ContactImage(
+            uri = contact.imageUrl,
+            modifier = modifiers.imageModifier
+                .clip(CircleShape)
+                .size(Card.card_md)
+        ) {
+            BoxCircle(
+                modifier = modifiers.imageModifier
+                    .background(
+                        shape = CircleShape,
+                        color = contact.colorDefault.copy(alpha = 0.6f),
+                    )
+                    .size(Card.card_md),
+                content = {
+                    BodyLarge(
+                        text = contact.name.first().toString().uppercase(),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.zIndex(1f)
+                    )
+                }
+            )
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Spacing.spacing_xs)
+        ) {
+            BodyLarge(
+                text = contact.name,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = modifiers.textModifier
+
+            )
+            ContactSecondaryInfo(contact)
+        }
+    }
+}
+
+@Composable
+private fun ContactSecondaryInfo(contact: Contact) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_sm)
+        ) {
+            BodySmall(
+                text = contact.phoneNumber.toString(),
+                color = MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.7f
+                )
+            )
+            if (!contact.email.isNullOrBlank()) {
+                CustomIcon(
+                    icon = R.drawable.icon_circle,
+                    modifier = Modifier.size(Spacing.spacing_sm),
+                    color = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 0.7f
+                    )
+                )
+                BodySmall(
+                    text = contact.email ?: "",
+                    color = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 0.7f
+                    )
+                )
             }
+        }
+    }
+
+}
+
+@Composable
+private fun ContactActionsSection(
+    contactId: String,
+    isFavorite: Boolean,
+    togglingFavoriteId: String?,
+    onFavoriteToggle: () -> Unit,
+    onShowMoreOptions: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_xs),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CustomIconButton(
+            icon = if (togglingFavoriteId == contactId || isFavorite)
+                R.drawable.icon_star_round_filled
+            else
+                R.drawable.icon_star_outline,
+            size = Card.card_sm,
+            color = MaterialTheme.colorScheme.tertiary
+        ) {
+            onFavoriteToggle()
+        }
+        CustomIconButton(
+            icon = R.drawable.icon_more_vert,
+            color = MaterialTheme.colorScheme.onBackground
+        ) {
+            onShowMoreOptions()
         }
     }
 }
