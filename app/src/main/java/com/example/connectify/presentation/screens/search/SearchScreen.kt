@@ -41,7 +41,7 @@ fun SearchScreen(
 ) {
 
     val searchUiState = searchViewModel.searchUiState.collectAsState()
-
+    val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
     var query by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
@@ -73,6 +73,7 @@ fun SearchScreen(
                 Spacer(modifier = Modifier.height(Spacing.spacing_lg))
                 if (searchUiState.value.result.isNotEmpty()) {
                     ContactList(
+                        togglingFavoriteId = togglingFavoriteId,
                         contacts = searchUiState.value.result,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedContentScope = animatedContentScope,

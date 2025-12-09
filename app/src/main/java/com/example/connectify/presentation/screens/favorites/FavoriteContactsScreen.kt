@@ -30,7 +30,7 @@ fun FavoriteContactsScreen(
 ) {
 
     val favoritesContact = contactViewModel.contactState.collectAsState().value.contacts
-
+    val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
     Scaffold(
         topBar = {
             ConnectifyToAppBar(
@@ -44,6 +44,7 @@ fun FavoriteContactsScreen(
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             ContactList(
+                togglingFavoriteId = togglingFavoriteId,
                 contacts = favoritesContact.filter { it.isFavorite },
                 sharedTransitionScope = sharedTransitionScope,
                 animatedContentScope = animatedContentScope,
