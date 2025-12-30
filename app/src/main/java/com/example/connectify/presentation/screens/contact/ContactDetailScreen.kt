@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
@@ -39,7 +40,6 @@ import com.example.connectify.presentation.components.contact.CallPhone
 import com.example.connectify.presentation.components.contact.ContactHeader
 import com.example.connectify.presentation.components.contact.SendEmail
 import com.example.connectify.presentation.components.contact.SendMessage
-import com.example.connectify.presentation.components.global.BodyLarge
 import com.example.connectify.presentation.components.global.BodyMedium
 import com.example.connectify.presentation.components.global.ButtonError
 import com.example.connectify.presentation.components.global.ButtonPrimary
@@ -72,6 +72,7 @@ fun ContactDetailScreen(
     val contact = contactViewModel.contactState.collectAsState().value.contact
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
 
     LaunchedEffect(contactId) {
         contactId?.let {
@@ -141,12 +142,13 @@ fun ContactDetailScreen(
                     )
                     ContactDetailBody(
                         contact,
+                        togglingFavoriteId = togglingFavoriteId,
                         modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
                         onDelete = {
                             showDialog = !showDialog
                         }
-                    ) { isFavorite ->
-                        contactViewModel.updateContactFavorite(isFavorite)
+                    ) {
+                        contactViewModel.toggleFavorite(contact)
                     }
                 }
                 ContactDeleteDialog(
@@ -166,9 +168,10 @@ fun ContactDetailScreen(
 @Composable
 fun ContactDetailBody(
     contact: Contact,
+    togglingFavoriteId: String?,
     modifier: Modifier = Modifier,
     onDelete: () -> Unit,
-    onClickFavorite: (Boolean) -> Unit
+    onFavoriteToggle: () -> Unit
 ) {
 
     Column(
@@ -179,15 +182,19 @@ fun ContactDetailBody(
             phoneNumber = contact.phoneNumber.toString(),
             email = contact.email ?: "",
             isFavorite = contact.isFavorite,
+            contactId = contact.id,
+            togglingFavoriteId = togglingFavoriteId,
             modifier = Modifier.fillMaxWidth()
         ) {
-            onClickFavorite(it)
+            onFavoriteToggle()
         }
         Spacer(modifier = Modifier.height(Spacing.spacing_sm))
         CallPhone(contact.phoneNumber.toString())
         SendMessage(contact.phoneNumber.toString())
         contact.email?.let { e ->
-            SendEmail(e)
+            if (e.isNotEmpty()) {
+                SendEmail(e)
+            }
         }
 
         Spacer(modifier = Modifier.height(Spacing.spacing_md))
@@ -216,15 +223,24 @@ fun ContactDeleteDialog(
                 contentAlignment = Alignment.Center
             ) {
                 Column(
-                    modifier = Modifier.padding(Spacing.spacing_xl),
+                    modifier = Modifier.padding(
+                        vertical = Spacing.spacing_xl,
+                        horizontal = Spacing.spacing_sm
+                    ),
                     verticalArrangement = Arrangement.spacedBy(Spacing.spacing_lg),
                 ) {
-                    BodyLarge(stringResource(R.string.confirm_delete_message))
+                    BodyMedium(
+                        text = stringResource(R.string.confirm_delete_message),
+                        maxLines = 3,
+                        textAlign = TextAlign.Center
+
+                    )
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md)
                     ) {
                         ButtonError(
-                            text = stringResource(R.string.confirm_delete),
+                            text = "Sí, eliminar",
                             modifier = Modifier.weight(1f)
                         ) {
                             onConfirm()
@@ -247,8 +263,10 @@ fun ContactDataInfo(
     modifier: Modifier = Modifier,
     email: String = "",
     phoneNumber: String,
+    contactId: String,
     isFavorite: Boolean,
-    onClickFavorite: (Boolean) -> Unit
+    togglingFavoriteId: String?,
+    onFavoriteToggle: () -> Unit
 ) {
 
     Row(
@@ -263,28 +281,21 @@ fun ContactDataInfo(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md)) {
                 ContactDataInfoChip(phoneNumber, R.drawable.icon_phone)
-                if (email.isNotEmpty()) {
+                if (email.trim().isNotEmpty()) {
                     ContactDataInfoChip(email, R.drawable.icon_email)
                 }
 
             }
         }
-        if (isFavorite) {
-            CustomIconButton(
-                icon = R.drawable.icon_star_round_filled,
-                size = Card.card_sm,
-                color = MaterialTheme.colorScheme.tertiary
-            ) {
-                onClickFavorite(false)
-            }
-        } else {
-            CustomIconButton(
-                icon = R.drawable.icon_star_outline,
-                size = Card.card_sm,
-                color = MaterialTheme.colorScheme.tertiary
-            ) {
-                onClickFavorite(true)
-            }
+        CustomIconButton(
+            icon = if (togglingFavoriteId == contactId || isFavorite)
+                R.drawable.icon_star_round_filled
+            else
+                R.drawable.icon_star_outline,
+            size = Card.card_sm,
+            color = MaterialTheme.colorScheme.tertiary
+        ) {
+            onFavoriteToggle()
         }
 
     }
