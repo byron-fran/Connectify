@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.zIndex
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
@@ -116,7 +117,9 @@ private fun ContactInfoSection(
             BodyLarge(
                 text = contact.name,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = modifiers.textModifier
+                modifier = modifiers
+                    .textModifier
+                    .testTag("contact_name_${contact.id}")
 
             )
             ContactSecondaryInfo(contact)
@@ -139,7 +142,9 @@ private fun ContactSecondaryInfo(contact: Contact) {
                 text = contact.phoneNumber.toString(),
                 color = MaterialTheme.colorScheme.onSurface.copy(
                     alpha = 0.7f
-                )
+                ),
+                modifier = Modifier
+                    .testTag("contact_phone_${contact.id}")
             )
             if (!contact.email.isNullOrBlank()) {
                 CustomIcon(
@@ -153,7 +158,9 @@ private fun ContactSecondaryInfo(contact: Contact) {
                     text = contact.email ?: "",
                     color = MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.7f
-                    )
+                    ),
+                    modifier = Modifier
+                        .testTag("contact_email_${contact.id}")
                 )
             }
         }
