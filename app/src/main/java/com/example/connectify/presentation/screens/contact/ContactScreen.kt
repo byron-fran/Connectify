@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactList
@@ -33,6 +35,7 @@ fun ContactScreen(
     onNavigateTo: (Screens) -> Unit,
 ) {
     val contacts = contactViewModel.contactState.collectAsState().value.contacts
+    val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
 
     Scaffold(
         topBar = {
@@ -66,24 +69,29 @@ fun ContactScreen(
                 )
             }
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.semantics{
+            contentDescription = "Contact Screen"
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues)
         ) {
             ContactList(
+                togglingFavoriteId = togglingFavoriteId,
                 contacts = contacts,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedContentScope = animatedContentScope,
-                modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
-                enableSharedTransitions = true,
+                modifier = Modifier,
                 screenKey = "contacts",
                 onChangeFavorite = { contact ->
-                    contactViewModel.updateContact(
-                        contact.copy(
-                            isFavorite = !contact.isFavorite
-                        )
-                    )
+                    contactViewModel.toggleFavorite(contact)
+                },
+                onRemove = {contact ->
+                    contactViewModel.deleteContact(contact)
+                },
+                onUpdate = { contactId ->
+                    onNavigateTo(Screens.EditContact(contactId))
                 }
             ) { contactId ->
                 onNavigateTo(Screens.ContactDetail(contactId, "contacts"))
