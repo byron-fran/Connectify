@@ -8,9 +8,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -22,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.connectify.domain.models.Contact
+import com.example.connectify.presentation.screens.contact.ContactDeleteDialog
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.ContactCardModifiers
 import com.example.connectify.utils.SharedTransition
@@ -29,6 +32,7 @@ import com.example.connectify.utils.SharedTransition
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ContactList(
+    togglingFavoriteId: String?,
     contacts: List<Contact>,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
@@ -36,14 +40,22 @@ fun ContactList(
     enableSharedTransitions: Boolean = true,
     screenKey: String? = null,
     onChangeFavorite: (Contact) -> Unit,
+    onRemove: (Contact) -> Unit,
+    onUpdate: (String) -> Unit,
     onNavigateToContactDetail: (String) -> Unit
 ) {
     var selectedContactForModal by remember { mutableStateOf<Contact?>(null) }
+    var selectedContactForDialog by remember  { mutableStateOf<Contact?>(null)}
+    var showDialogDelete by remember { mutableStateOf(false) }
 
     with(sharedTransitionScope) {
-        LazyColumn(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md)
+
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(350.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.spacing_sm),
+            verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+            modifier = modifier
         ) {
             items(contacts) { contact ->
                 val contactModifier = if (enableSharedTransitions) {
@@ -77,17 +89,29 @@ fun ContactList(
                 } else {
                     ContactCardModifiers()
                 }
-                ContactCard(
+
+                SwipeCardContact(
+                    togglingFavoriteId = togglingFavoriteId,
                     contact = contact,
                     modifiers = contactModifier,
-                    onChangeFavorite = { onChangeFavorite(contact) },
+                    onFavoriteToggle = { onChangeFavorite(it) },
                     onChangeModalBottonSheet = {
                         selectedContactForModal = contact
+                    },
+                    onUpdate = { contactId ->
+                        onUpdate(contactId)
+                    },
+                    onRemove = { c ->
+                        showDialogDelete = true
+                        selectedContactForDialog = c
                     }
+
                 ) {
                     onNavigateToContactDetail(contact.id)
                 }
             }
+
+
         }
     }
 
@@ -99,6 +123,17 @@ fun ContactList(
                 selectedContactForModal = null
             }
         )
+    }
+
+    selectedContactForDialog?.let { c ->
+        ContactDeleteDialog(showDialogDelete, onConfirm = {
+            onRemove(c)
+            showDialogDelete = false
+            selectedContactForDialog = null
+        }) {
+            showDialogDelete = false
+            selectedContactForDialog = null
+        }
     }
 }
 
@@ -117,8 +152,7 @@ fun ContactModalBottomSheet(
             Column(
                 modifier = Modifier.height(250.dp),
                 verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
-
-            ) {
+                ) {
                 CallPhone(contact.phoneNumber.toString())
                 SendMessage(contact.phoneNumber.toString())
                 contact.email?.let { e ->
