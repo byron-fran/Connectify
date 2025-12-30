@@ -37,7 +37,7 @@ fun SearchScreen(
     animatedContentScope: AnimatedContentScope,
     searchViewModel: SearchViewModel = hiltViewModel<SearchViewModel>(),
     contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
-    onNavigationToDetail: (Screens) -> Unit
+    onNavigationTo: (Screens) -> Unit
 ) {
 
     val searchUiState = searchViewModel.searchUiState.collectAsState()
@@ -77,7 +77,6 @@ fun SearchScreen(
                         contacts = searchUiState.value.result,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedContentScope = animatedContentScope,
-                        enableSharedTransitions = true,
                         screenKey = "search",
                         onChangeFavorite = { contact ->
                             contactViewModel.updateContact(
@@ -85,9 +84,15 @@ fun SearchScreen(
                                     isFavorite = !contact.isFavorite
                                 )
                             )
+                        },
+                        onRemove = { contact ->
+                            contactViewModel.deleteContact(contact)
+                        },
+                        onUpdate = { contactId ->
+                            onNavigationTo(Screens.EditContact(contactId))
                         }
                     ) {
-                        onNavigationToDetail(Screens.ContactDetail(it, "search"))
+                        onNavigationTo(Screens.ContactDetail(it, "search"))
                     }
                 } else {
                     Box(contentAlignment = Alignment.Center) {
