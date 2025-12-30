@@ -8,12 +8,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.connectify.presentation.screens.theme.ThemeViewModel
 import com.example.connectify.utils.ThemeMode
 
 
@@ -47,12 +43,11 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun ConnectifyTheme(
-    themeViewModel : ThemeViewModel = hiltViewModel(),
+    themeMode : ThemeMode,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
 
-    val themeMode by themeViewModel.themeMode.collectAsState()
     val configuration = LocalConfiguration.current
 
     val isDark = when (themeMode) {
