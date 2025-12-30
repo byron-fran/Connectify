@@ -16,62 +16,37 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.connectify.R
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.LabelSmall
 
-data class NavItem(
-    val screen: Screens,
-    val label: Int,
-    val icon: Int
-)
-
 @Composable
 fun ContactNavigationSuiteScaffold(
-    navHostController: NavHostController,
+    navigationItems: List<NavItem>,
+    onNavigateTo: (String) -> Unit,
+    currentRoute: String?,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
 
-    val navBackStackEntry by navHostController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-
-    val selectDestination: Screens = when (currentDestination?.route) {
+    val selectDestination: Screens = when (currentRoute) {
         Screens.Contacts::class.qualifiedName -> Screens.Contacts
         Screens.Favorites::class.qualifiedName -> Screens.Favorites
         Screens.Search::class.qualifiedName -> Screens.Search
         else -> Screens.Contacts
     }
 
-    val navigationItems = listOf(
-        NavItem(
-            screen = Screens.Contacts,
-            label = R.string.contacts,
-            icon = R.drawable.icon_contact
-        ),
-        NavItem(
-            screen = Screens.Favorites,
-            label = R.string.favorites,
-            icon = R.drawable.icon_star_round_filled
-        ),
-        NavItem(
-            screen = Screens.Search,
-            label = R.string.search,
-            icon = R.drawable.icon_search
-        )
-
-    )
-
-    val navItemColors = NavigationBarColors()
-    val navigationRailItemColors = NavigationRailColors()
-    val navigationDrawerItemColors = NavigationDrawerColors()
+    val navItemColors = navigationBarColors()
+    val navigationRailItemColors = navigationRailColors()
+    val navigationDrawerItemColors = navigationDrawerColors()
 
     val windowSize = with(LocalDensity.current) {
         currentWindowSize().toSize().toDpSize()
@@ -86,13 +61,14 @@ fun ContactNavigationSuiteScaffold(
     }
 
     NavigationSuiteScaffold(
+        modifier = modifier,
         layoutType = layoutType,
         navigationSuiteItems = {
             navigationItems.forEach {
                 item(
                     selected = it.screen == selectDestination,
                     onClick = {
-                        navHostController.navigateSingleBottomTo(it.screen::class.qualifiedName!!)
+                        onNavigateTo(it.screen::class.qualifiedName!!)
                     },
                     icon = {
                         CustomIcon(icon = it.icon, color = LocalContentColor.current)
@@ -104,7 +80,12 @@ fun ContactNavigationSuiteScaffold(
                         navigationBarItemColors = navItemColors,
                         navigationRailItemColors = navigationRailItemColors,
                         navigationDrawerItemColors = navigationDrawerItemColors
-                    )
+                    ),
+                    modifier = Modifier
+                        .testTag("navigation_item_${it.contentDescription}")
+                        .semantics{
+                            contentDescription = it.contentDescription
+                        }
                 )
             }
         },
@@ -120,7 +101,7 @@ fun ContactNavigationSuiteScaffold(
 }
 
 @Composable
-fun NavigationBarColors() : NavigationBarItemColors {
+fun navigationBarColors(): NavigationBarItemColors {
 
     return NavigationBarItemDefaults.colors(
         selectedIconColor = MaterialTheme.colorScheme.onSecondary,
@@ -133,7 +114,7 @@ fun NavigationBarColors() : NavigationBarItemColors {
 }
 
 @Composable
-fun NavigationRailColors() : NavigationRailItemColors {
+fun navigationRailColors(): NavigationRailItemColors {
     return NavigationRailItemDefaults.colors(
         selectedIconColor = MaterialTheme.colorScheme.onSecondary,
         selectedTextColor = MaterialTheme.colorScheme.onSecondary,
@@ -144,7 +125,7 @@ fun NavigationRailColors() : NavigationRailItemColors {
 }
 
 @Composable
-fun NavigationDrawerColors() : NavigationDrawerItemColors {
+fun navigationDrawerColors(): NavigationDrawerItemColors {
 
     return NavigationDrawerItemDefaults.colors(
         selectedIconColor = MaterialTheme.colorScheme.onSecondary,
