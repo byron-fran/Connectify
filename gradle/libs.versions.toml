@@ -34,6 +34,9 @@ splashscreen = "1.0.1"
 
 material = "1.13.0-alpha08"
 
+coroutines = "1.9.0"
+
+turnbine = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -77,6 +80,9 @@ androidx-splashcreen = {module="androidx.core:core-splashscreen", version.ref ="
 
 # Material Components / Material3 clásico (no Compose)
 google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+#turbine
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turnbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
