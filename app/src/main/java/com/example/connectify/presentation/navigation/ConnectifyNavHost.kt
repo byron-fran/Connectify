@@ -17,13 +17,13 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.connectify.presentation.screens.settings.SettingsScreen
 import com.example.connectify.presentation.screens.contact.AddContactScreen
 import com.example.connectify.presentation.screens.contact.ContactDetailScreen
 import com.example.connectify.presentation.screens.contact.ContactEditScreen
 import com.example.connectify.presentation.screens.contact.ContactScreen
 import com.example.connectify.presentation.screens.favorites.FavoriteContactsScreen
 import com.example.connectify.presentation.screens.search.SearchScreen
+import com.example.connectify.presentation.screens.settings.SettingsScreen
 import com.example.connectify.presentation.screens.theme.ThemeScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -102,7 +102,7 @@ fun ConnectifyNavHost(
                     onNavigateBack = {
                         navHostController.popBackStack()
                     },
-                    onNavigateToDetail = { route ->
+                    onNavigateTo = { route ->
                         navHostController.navigate(route)
                     }
                 )
