@@ -4,9 +4,8 @@ import com.example.connectify.domain.models.Contact
 import com.example.connectify.domain.repositories.ContactRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 class FakeContactRepository : ContactRepository {
     private val contacts = MutableStateFlow<List<Contact>>(emptyList())
@@ -25,18 +24,24 @@ class FakeContactRepository : ContactRepository {
         contacts.value = currentList
     }
 
-    override fun getAllContacts(): Flow<List<Contact>> {
-        if(shouldThrowOnGetAll) {
-            return flow {throw Exception("Error fetching contacts") }
+    override fun getAllContacts(): Flow<List<Contact>> = contacts
+        .onStart {
+            if (shouldThrowOnGetAll) {
+                throw Exception("Error fetching contacts")
+            }
         }
-        return contacts
-    }
+        .map { contactList ->
+            if (shouldThrowOnGetAll) {
+                throw Exception("Error fetching contacts")
+            }
+            contactList
+        }
 
-    override fun getContactById(id: String): Flow<Contact?> {
-        if(shouldThrowOnGetById) {
-            return flow {throw Exception("Error getting contact by id") }
+    override fun getContactById(id: String): Flow<Contact?> = contacts.map { list ->
+        if (shouldThrowOnGetById) {
+            throw Exception("Error getting contact by id")
         }
-        return contacts.map { list -> list.find { it.id == id } }
+        list.find { it.id == id }
     }
 
     override suspend fun deleteContactById(contact: Contact) {
