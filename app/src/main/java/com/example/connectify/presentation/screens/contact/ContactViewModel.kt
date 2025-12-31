@@ -1,14 +1,21 @@
 package com.example.connectify.presentation.screens.contact
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.domain.useCases.ContactUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,67 +24,108 @@ class ContactViewModel @Inject constructor(
     private val contactUseCases: ContactUseCases
 ) : ViewModel() {
 
-    private val _contactState = MutableStateFlow(ContactState())
-    val contactState = _contactState.asStateFlow()
+    private val _togglingFavoriteId = mutableStateOf<String?>(null)
+    val togglingFavoriteId: State<String?> = _togglingFavoriteId
 
-    init {
-        getAllContacts()
-    }
+    private val _selectedContactId = MutableStateFlow<String?>(null)
+    private val _error = MutableStateFlow<String?>(null)
+    private val _allContacts: StateFlow<List<Contact>> = contactUseCases.getAllContacts()
+        .catch { e ->
+            _error.value = e.message
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+        )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val _selectedContact: StateFlow<Contact?> = _selectedContactId
+        .flatMapLatest { id ->
+            id?.let { 
+                contactUseCases.getContactById(it)
+                    .catch { e ->
+                        _error.value = e.message
+                        emit(null)
+                    }
+            } ?: flowOf(null)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
+
+    val contactState: StateFlow<ContactState> = combine(
+        _allContacts,
+        _selectedContact,
+        _error
+    ) { contacts, contact, error ->
+        ContactState(
+            contacts = contacts,
+            contact = contact,
+            error = error
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = ContactState()
+    )
 
     fun insertContact(contact: Contact) {
-        viewModelScope.launch {
-            contactUseCases.insertContact(contact)
-        }
-    }
 
-
-    fun getAllContacts() {
         viewModelScope.launch {
-            contactUseCases.getAllContacts().collect {
-                _contactState.update { state ->
-                    state.copy(
-                        contacts = it
-                    )
-                }
+            try {
+                contactUseCases.insertContact(contact)
+
+            } catch (e: Exception) {
+                _error.value = e.message
+
             }
         }
-
     }
 
 
     fun getContactById(id: String) {
-        viewModelScope.launch {
-            contactUseCases.getContactById(id).collect {
-                _contactState.update { state ->
-                    state.copy(
-                        contact = it
-                    )
-                }
-            }
-        }
+        _selectedContactId.value = id
     }
 
     fun updateContact(contact: Contact) {
         viewModelScope.launch {
-            contactUseCases.updateContact(contact)
+            try {
+                contactUseCases.updateContact(contact)
+
+            } catch (e: Exception) {
+               _error.value = e.message
+            }
         }
     }
 
     fun deleteContact(contact: Contact) {
+
         viewModelScope.launch {
-            contactUseCases.deleteContact(contact)
+            try {
+                contactUseCases.deleteContact(contact)
+            } catch (e: Exception) {
+               _error.value = e.message
+            }
         }
 
     }
 
-    fun updateContactFavorite(isFavorite: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _contactState.value.contact?.let {
-                contactUseCases.updateContact(
-                    contact = it.copy(
-                        isFavorite = isFavorite
-                    )
-                )
+    fun toggleFavorite(contact: Contact) {
+        viewModelScope.launch {
+            val newValue = !contact.isFavorite
+            val contactOptimistic = contact.copy(isFavorite = newValue)
+
+            _togglingFavoriteId.value = contact.id
+
+            try {
+                contactUseCases.updateContact(contactOptimistic)
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _togglingFavoriteId.value = null
             }
         }
     }

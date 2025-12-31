@@ -42,7 +42,7 @@ class ContactViewModelTest {
     private lateinit var fakeRepository: FakeContactRepository
     private lateinit var contactUseCases: ContactUseCases
 
-    private suspend fun insertContacts(vararg contacts : Contact) {
+    private suspend fun insertContacts(vararg contacts: Contact) {
         fakeRepository.shouldThrowOnInsert = false
         contacts.forEach { viewModel.insertContact(it) }
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
@@ -178,13 +178,21 @@ class ContactViewModelTest {
     @Test
     fun contactViewModel_getAllContacts_setErrorOnFailure() = runTest {
         val expectedErrorMessage = "Error fetching contacts"
-        insertContacts(contactOne)
+        
         fakeRepository.shouldThrowOnGetAll = true
+        
+        val tempContact = Contact()
+        fakeRepository.shouldThrowOnInsert = false
 
+        fakeRepository.insertContact(tempContact)
+        fakeRepository.shouldThrowOnDelete = false
+        fakeRepository.deleteContactById(tempContact)
+        
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
+        assertEquals(emptyList<Contact>(), viewModel.contactState.value.contacts)
         assertEquals(expectedErrorMessage, viewModel.contactState.value.error)
-        assertEquals(listOf(contactOne), viewModel.contactState.value.contacts)
+
     }
 
     @Test
@@ -194,9 +202,9 @@ class ContactViewModelTest {
         insertContacts(contactOne)
         fakeRepository.shouldThrowOnGetById = true
 
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
         // Act
         viewModel.getContactById("")
-        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
         // Assert
         assertEquals(expectedErrorMessage, viewModel.contactState.value.error)
         assertEquals(null, viewModel.contactState.value.contact)
