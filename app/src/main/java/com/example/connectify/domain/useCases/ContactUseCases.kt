@@ -49,10 +49,19 @@ class DeleteContact(
     }
 }
 
+class DeleteAllContacts(
+    private val contactRepository: ContactRepository
+) {
+    suspend operator fun invoke() {
+        contactRepository.deleteAllContacts()
+    }
+}
+
 data class ContactUseCases (
     val insertContact: InsertContactUseCase,
     val getAllContacts: GetAllContactsUseCase,
     val getContactById: GetContactById,
     val updateContact: UpdateContact,
-    val deleteContact: DeleteContact
+    val deleteContact: DeleteContact,
+    val deleteAllContacts: DeleteAllContacts
 )

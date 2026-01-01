@@ -31,5 +31,9 @@ class ContactRepositoryImpl(private val contactDao: ContactDao) : ContactReposit
     override suspend fun updateContact(contact : Contact) {
         contactDao.updateContact(contact.toContactEntity())
     }
+
+    override suspend fun deleteAllContacts() {
+        contactDao.deleteAllContacts()
+    }
 }
 

@@ -4,6 +4,7 @@ import com.example.connectify.data.local.dao.ContactDao
 import com.example.connectify.data.repositories.ContactRepositoryImpl
 import com.example.connectify.domain.repositories.ContactRepository
 import com.example.connectify.domain.useCases.ContactUseCases
+import com.example.connectify.domain.useCases.DeleteAllContacts
 import com.example.connectify.domain.useCases.DeleteContact
 import com.example.connectify.domain.useCases.GetAllContactsUseCase
 import com.example.connectify.domain.useCases.GetContactById
@@ -26,7 +27,8 @@ object ContactModule {
             getAllContacts = GetAllContactsUseCase(contactRepository),
             getContactById = GetContactById(contactRepository),
             updateContact = UpdateContact(contactRepository),
-            deleteContact = DeleteContact(contactRepository)
+            deleteContact = DeleteContact(contactRepository),
+            deleteAllContacts = DeleteAllContacts(contactRepository)
         )
     }
 
