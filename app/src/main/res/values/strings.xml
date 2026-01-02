@@ -27,4 +27,10 @@
     <string name="light_mode">Light</string>
     <string name="system_mode_default">System default</string>
     <string name="theme">Themes</string>
+    <string name="copy">Copied</string>
+    <string name="empty_contacts">Empty contacts</string>
+    <string name="empty_favorites">Empty favorites</string>
+    <string name="delete_all_contacts_content">Are you sure you want to delete all contacts? They cannot be recovered.</string>
+    <string name="delete_all_contacts">Delete all contacts</string>
+    <string name="success_remove_all">All contacts were deleted.</string>
 </resources>

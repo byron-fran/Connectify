@@ -28,4 +28,10 @@
     <string name="light_mode">Claro</string>
     <string name="system_mode_default">Definido por el sistema</string>
     <string name="theme">Temas</string>
+    <string name="copy">Copiado</string>
+    <string name="empty_contacts">No hay contactos</string>
+    <string name="empty_favorites">No hay favoritos</string>
+    <string name="delete_all_contacts_content">Estas seguro de eliminar todos los contactos ? Ya no se podrán recuperar</string>
+    <string name="delete_all_contacts">Eliminar todos los contactos</string>
+    <string name="success_remove_all">Se borraron todos los contactos</string>
 </resources>
