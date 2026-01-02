@@ -1,5 +1,6 @@
 package com.example.connectify.presentation.components.contact
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.DrawableRes
@@ -22,6 +23,7 @@ import com.example.connectify.presentation.components.global.BodyMedium
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.ui.theme.RoundedCorner
 import com.example.connectify.ui.theme.Spacing
+import androidx.core.net.toUri
 
 @Composable
 fun ContactCardAction(
@@ -55,25 +57,18 @@ fun ContactCardAction(
 fun SendMessage(
     phoneNumber: String,
     modifier: Modifier = Modifier,
+    onClick : () -> Unit = {}
 ) {
 
     val context = LocalContext.current
-
-    val intent = Intent(Intent.ACTION_SENDTO).apply {
-        data = Uri.parse("smsto:$phoneNumber")
-        putExtra("sms_body", "")
-    }
-
-    fun sendMessage() {
-        context.startActivity(intent)
-    }
 
     ContactCardAction(
         title = stringResource(R.string.send_message),
         icon = R.drawable.icon_message,
         modifier = modifier
     ) {
-        sendMessage()
+        sendSMS(phoneNumber, context)
+        onClick()
     }
 }
 
@@ -81,12 +76,41 @@ fun SendMessage(
 fun SendEmail(
     to: String,
     modifier: Modifier = Modifier,
+    onClick :() -> Unit = {}
 ) {
 
     val context = LocalContext.current
 
-    val textSend = stringResource(R.string.send_email)
+    ContactCardAction(
+        title = stringResource(R.string.send_email),
+        icon = R.drawable.icon_email,
+        modifier = modifier
+    ) {
+        sendEmail(to, context)
+        onClick()
+    }
+}
 
+@Composable
+fun CallPhone(
+    phoneNumber: String,
+    modifier: Modifier = Modifier,
+    onClick :() -> Unit = {}
+) {
+
+    val context = LocalContext.current
+
+    ContactCardAction(
+        title = stringResource(R.string.call_contact),
+        icon = R.drawable.icon_phone,
+        modifier = modifier
+    ) {
+        callPhone(phoneNumber, context)
+        onClick()
+    }
+}
+
+fun sendEmail(to: String, context : Context) {
 
     val intent = Intent(Intent.ACTION_SENDTO)
     intent.data = Uri.parse("mailto:")
@@ -94,41 +118,23 @@ fun SendEmail(
     intent.putExtra(Intent.EXTRA_SUBJECT, "")
     intent.putExtra(Intent.EXTRA_TEXT, "")
 
-    fun sendEmail() {
-        context.startActivity(Intent.createChooser(intent, textSend))
-
-    }
-
-    ContactCardAction(
-        title = stringResource(R.string.send_email),
-        icon = R.drawable.icon_email,
-        modifier = modifier
-    ) {
-        sendEmail()
-    }
+    context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)))
 }
 
-@Composable
-fun CallPhone(
-    phoneNumber: String,
-    modifier: Modifier = Modifier
-) {
+fun sendSMS(phoneNumber: String, context: Context) {
 
-    val context = LocalContext.current
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("smsto:$phoneNumber")
+        putExtra("sms_body", "")
+    }
+    context.startActivity(intent)
 
+}
+
+fun callPhone(phoneNumber : String, context : Context) {
     val intent = Intent(Intent.ACTION_DIAL).apply {
-        data = Uri.parse("tel:$phoneNumber")
+        data = "tel:$phoneNumber".toUri()
     }
 
-    fun callPhone() {
-        context.startActivity(intent)
-    }
-
-    ContactCardAction(
-        title = stringResource(R.string.call_contact),
-        icon = R.drawable.icon_phone,
-        modifier = modifier
-    ) {
-        callPhone()
-    }
+    context.startActivity(intent)
 }
