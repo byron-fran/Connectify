@@ -22,7 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.presentation.screens.contact.ContactDeleteDialog
 import com.example.connectify.ui.theme.Spacing
@@ -46,7 +48,7 @@ fun ContactList(
 ) {
     var selectedContactForModal by remember { mutableStateOf<Contact?>(null) }
     var selectedContactForDialog by remember  { mutableStateOf<Contact?>(null)}
-    var showDialogDelete by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     with(sharedTransitionScope) {
 
@@ -102,7 +104,7 @@ fun ContactList(
                         onUpdate(contactId)
                     },
                     onRemove = { c ->
-                        showDialogDelete = true
+                        showDialog = true
                         selectedContactForDialog = c
                     }
 
@@ -126,12 +128,15 @@ fun ContactList(
     }
 
     selectedContactForDialog?.let { c ->
-        ContactDeleteDialog(showDialogDelete, onConfirm = {
+        ContactDeleteDialog(
+            text = stringResource(R.string.confirm_delete_message),
+            showDialog,
+            onConfirm = {
             onRemove(c)
-            showDialogDelete = false
+            showDialog = false
             selectedContactForDialog = null
         }) {
-            showDialogDelete = false
+            showDialog = false
             selectedContactForDialog = null
         }
     }
@@ -142,6 +147,7 @@ fun ContactList(
 fun ContactModalBottomSheet(
     contact: Contact,
     isActiveModalSheet: Boolean,
+    modifier : Modifier = Modifier,
     onChangeContactModalSheet: () -> Unit,
 ) {
     if (isActiveModalSheet) {
@@ -150,13 +156,23 @@ fun ContactModalBottomSheet(
             containerColor = MaterialTheme.colorScheme.background,
         ) {
             Column(
-                modifier = Modifier.height(250.dp),
+                modifier = modifier.height(250.dp),
                 verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
                 ) {
-                CallPhone(contact.phoneNumber.toString())
-                SendMessage(contact.phoneNumber.toString())
+                CallPhone(
+                    phoneNumber = contact.phoneNumber.toString()){
+                    onChangeContactModalSheet()
+                }
+                SendMessage(
+                    phoneNumber=contact.phoneNumber.toString()){
+                    onChangeContactModalSheet()
+                }
                 contact.email?.let { e ->
-                    SendEmail(e)
+                    if(e.trim().isNotEmpty()){
+                        SendEmail(e){
+                            onChangeContactModalSheet()
+                        }
+                    }
                 }
             }
         }
