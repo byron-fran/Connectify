@@ -1,5 +1,7 @@
 package com.example.connectify.presentation.screens.contact
 
+import android.content.ClipData
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -12,10 +14,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -26,20 +31,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
-import com.example.connectify.presentation.components.contact.CallPhone
 import com.example.connectify.presentation.components.contact.ContactHeader
-import com.example.connectify.presentation.components.contact.SendEmail
-import com.example.connectify.presentation.components.contact.SendMessage
+import com.example.connectify.presentation.components.contact.callPhone
+import com.example.connectify.presentation.components.contact.sendEmail
+import com.example.connectify.presentation.components.contact.sendSMS
 import com.example.connectify.presentation.components.global.BodyMedium
 import com.example.connectify.presentation.components.global.ButtonError
 import com.example.connectify.presentation.components.global.ButtonPrimary
@@ -47,12 +56,14 @@ import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.presentation.navigation.Screens
-import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.RoundedCorner
 import com.example.connectify.ui.theme.Spacing
+import com.example.connectify.ui.theme.Spacing.spacing_md
 import com.example.connectify.utils.ContactCardModifiers
 import com.example.connectify.utils.SharedTransition
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -71,7 +82,6 @@ fun ContactDetailScreen(
     val scrollState = rememberScrollState()
     val contact = contactViewModel.contactState.collectAsState().value.contact
     var showDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
 
     LaunchedEffect(contactId) {
@@ -87,13 +97,8 @@ fun ContactDetailScreen(
             ConnectifyToAppBar(
                 title = { },
                 actions = {
-                    CustomIconButton(
-                        icon = R.drawable.icon_edit,
-                        color = MaterialTheme.colorScheme.onBackground
-                    ) {
-                        contact?.let {
-                            onNavigateToEdit(Screens.EditContact(contact.id))
-                        }
+                    CustomIconButton( icon = R.drawable.icon_edit, color = MaterialTheme.colorScheme.onBackground) {
+                        contact?.let { onNavigateToEdit(Screens.EditContact(contact.id)) }
                     }
                 }
             ) { onNavigateBack() }
@@ -105,6 +110,7 @@ fun ContactDetailScreen(
             with(sharedTransitionScope) {
                 Column(
                     modifier = Modifier
+                        .fillMaxSize()
                         .padding(paddingValues)
                         .verticalScroll(scrollState)
                 ) {
@@ -143,15 +149,23 @@ fun ContactDetailScreen(
                     ContactDetailBody(
                         contact,
                         togglingFavoriteId = togglingFavoriteId,
-                        modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
-                        onDelete = {
-                            showDialog = !showDialog
-                        }
+                        modifier = Modifier.padding(horizontal = Spacing.spacing_sm)
                     ) {
                         contactViewModel.toggleFavorite(contact)
                     }
+                    Spacer(modifier = Modifier.weight(1f))
+                    ButtonError(
+
+                        text = stringResource(R.string.delete_contact),
+                        modifier = Modifier
+                            .padding(horizontal = Spacing.spacing_sm)
+                            .fillMaxWidth()
+                    ) {
+                        showDialog = !showDialog
+                    }
                 }
                 ContactDeleteDialog(
+                    text = stringResource(R.string.confirm_delete_message),
                     showDialog,
                     onConfirm = {
                         contactViewModel.deleteContact(it)
@@ -170,42 +184,74 @@ fun ContactDetailBody(
     contact: Contact,
     togglingFavoriteId: String?,
     modifier: Modifier = Modifier,
-    onDelete: () -> Unit,
     onFavoriteToggle: () -> Unit
 ) {
-
+    val context = LocalContext.current
     Column(
-        verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
-        modifier = modifier.background(MaterialTheme.colorScheme.background)
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
+        verticalArrangement = Arrangement.SpaceBetween
+
     ) {
-        ContactDataInfo(
-            phoneNumber = contact.phoneNumber.toString(),
-            email = contact.email ?: "",
-            isFavorite = contact.isFavorite,
-            contactId = contact.id,
-            togglingFavoriteId = togglingFavoriteId,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            onFavoriteToggle()
-        }
-        Spacer(modifier = Modifier.height(Spacing.spacing_sm))
-        CallPhone(contact.phoneNumber.toString())
-        SendMessage(contact.phoneNumber.toString())
-        contact.email?.let { e ->
-            if (e.isNotEmpty()) {
-                SendEmail(e)
+        Column( verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md)) {
+
+            Spacer(modifier = Modifier.height(Spacing.spacing_sm))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CustomIconButton(
+                        icon = R.drawable.icon_phone,
+                        modifier = ModifierButtonDetail()
+                    ) {
+                        callPhone(contact.phoneNumber.toString(), context)
+                    }
+                    CustomIconButton(
+                        icon = R.drawable.icon_message,
+                        modifier = ModifierButtonDetail()
+                    ) {
+                        sendSMS(contact.phoneNumber.toString(), context)
+                    }
+                    contact.email?.let { e ->
+                        if (e.isNotEmpty()) {
+                            CustomIconButton(
+                                icon = R.drawable.icon_email,
+                                modifier = ModifierButtonDetail()
+                            ) {
+                                sendEmail(e, context)
+                            }
+                        }
+                    }
+                }
+                CustomIconButton(
+                    icon = if (togglingFavoriteId == contact.id || contact.isFavorite)
+                        R.drawable.icon_star_round_filled
+                    else
+                        R.drawable.icon_star_outline,
+                    color = MaterialTheme.colorScheme.tertiary
+                ) {
+                    onFavoriteToggle()
+                }
             }
+            ContactDataInfo(
+                phoneNumber = contact.phoneNumber.toString(),
+                email = contact.email ?: "",
+                modifier = Modifier.fillMaxWidth()
+            )
+
         }
 
-        Spacer(modifier = Modifier.height(Spacing.spacing_md))
-        ButtonError(stringResource(R.string.delete_contact), modifier = Modifier.fillMaxWidth()) {
-            onDelete()
-        }
     }
 }
 
 @Composable
 fun ContactDeleteDialog(
+    text: String,
     showDialog: Boolean,
     onConfirm: () -> Unit,
     onCancel: () -> Unit
@@ -230,7 +276,7 @@ fun ContactDeleteDialog(
                     verticalArrangement = Arrangement.spacedBy(Spacing.spacing_lg),
                 ) {
                     BodyMedium(
-                        text = stringResource(R.string.confirm_delete_message),
+                        text = text,
                         maxLines = 3,
                         textAlign = TextAlign.Center
 
@@ -263,10 +309,6 @@ fun ContactDataInfo(
     modifier: Modifier = Modifier,
     email: String = "",
     phoneNumber: String,
-    contactId: String,
-    isFavorite: Boolean,
-    togglingFavoriteId: String?,
-    onFavoriteToggle: () -> Unit
 ) {
 
     Row(
@@ -280,22 +322,22 @@ fun ContactDataInfo(
             horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md)) {
-                ContactDataInfoChip(phoneNumber, R.drawable.icon_phone)
+
+                ContactDataInfoChip(
+                    text = "+$phoneNumber",
+                    icon = R.drawable.icon_phone,
+                    modifier = Modifier.fillMaxWidth()
+                )
                 if (email.trim().isNotEmpty()) {
-                    ContactDataInfoChip(email, R.drawable.icon_email)
+                    ContactDataInfoChip(
+                        text = email,
+                        icon = R.drawable.icon_email,
+                        modifier = Modifier.fillMaxWidth()
+
+                    )
                 }
 
             }
-        }
-        CustomIconButton(
-            icon = if (togglingFavoriteId == contactId || isFavorite)
-                R.drawable.icon_star_round_filled
-            else
-                R.drawable.icon_star_outline,
-            size = Card.card_sm,
-            color = MaterialTheme.colorScheme.tertiary
-        ) {
-            onFavoriteToggle()
         }
 
     }
@@ -307,6 +349,11 @@ fun ContactDataInfoChip(
     icon: Int,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    val toast = Toast.makeText(context, R.string.copy, Toast.LENGTH_SHORT)
+
     Row(
         modifier = modifier
             .background(
@@ -314,10 +361,40 @@ fun ContactDataInfoChip(
                 shape = RoundedCornerShape(RoundedCorner.rounded_corner_md)
             )
             .padding(Spacing.spacing_md),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
+
     ) {
-        CustomIcon(icon, color = MaterialTheme.colorScheme.onSurface)
-        BodyMedium(text, color = MaterialTheme.colorScheme.onSurface)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CustomIcon(icon, color = MaterialTheme.colorScheme.onSurface)
+            BodyMedium(text, color = MaterialTheme.colorScheme.onSurface)
+        }
+        CustomIconButton(
+            icon = R.drawable.icon_copy_content,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(24.dp)
+        ) {
+            scope.launch {
+                clipboardManager.setClipEntry(
+                    ClipEntry(ClipData.newPlainText("text", text))
+
+                )
+                delay(500)
+                toast.show()
+            }
+        }
     }
+}
+
+@Composable
+private fun ModifierButtonDetail(): Modifier {
+    return Modifier
+        .padding(spacing_md)
+        .background(
+            color = MaterialTheme.colorScheme.secondary,
+            shape = CircleShape
+        )
 }
