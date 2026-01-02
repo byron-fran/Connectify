@@ -1,8 +1,10 @@
 package com.example.connectify.presentation.screens.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,25 +13,39 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.global.BodyLarge
+import com.example.connectify.presentation.components.global.ButtonError
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.presentation.navigation.Screens
+import com.example.connectify.presentation.screens.contact.ContactDeleteDialog
+import com.example.connectify.presentation.screens.contact.ContactViewModel
 import com.example.connectify.ui.theme.Spacing
 
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
+    contactViewModel: ContactViewModel = hiltViewModel(),
     onNavigateTo: (Screens) -> Unit,
     onNavigateBack: () -> Unit,
 
     ) {
+    val contacts = contactViewModel.contactState.collectAsState().value.contacts
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val toast = Toast.makeText(context, R.string.success_remove_all, Toast.LENGTH_SHORT)
 
     Scaffold(
         topBar = {
@@ -43,9 +59,8 @@ fun SettingsScreen(
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
-            Column(
-                modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
+        Column( modifier = Modifier.padding(paddingValues)) {
+            Column( modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.spacing_md)
 
             ) {
@@ -55,8 +70,29 @@ fun SettingsScreen(
                 ) {
                     onNavigateTo(Screens.Theme)
                 }
+                Spacer(modifier = Modifier.weight(1f))
+                if(contacts.isNotEmpty()){
+                    ButtonError(
+                        text =stringResource(R.string.delete_all_contacts),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        showDialog = !showDialog
+                    }
+                }
             }
 
+            ContactDeleteDialog(
+                text = stringResource(R.string.delete_all_contacts_content),
+                showDialog,
+                onConfirm = {
+                    settingsViewModel.deleteAllContacts()
+                    showDialog = !showDialog
+                    toast.show()
+                },
+                onCancel = {
+                    showDialog = !showDialog
+                }
+            )
         }
     }
 }
