@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FloatingActionButton
@@ -18,13 +19,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactList
+import com.example.connectify.presentation.components.global.BodyLarge
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.presentation.navigation.Screens
+import com.example.connectify.presentation.screens.empty.EmptyScreen
 import com.example.connectify.ui.theme.Card
-import com.example.connectify.ui.theme.Spacing
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -74,27 +76,34 @@ fun ContactScreen(
             contentDescription = "Contact Screen"
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            ContactList(
-                togglingFavoriteId = togglingFavoriteId,
-                contacts = contacts,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope,
-                modifier = Modifier,
-                screenKey = "contacts",
-                onChangeFavorite = { contact ->
-                    contactViewModel.toggleFavorite(contact)
-                },
-                onRemove = {contact ->
-                    contactViewModel.deleteContact(contact)
-                },
-                onUpdate = { contactId ->
-                    onNavigateTo(Screens.EditContact(contactId))
+
+        if(contacts.isNotEmpty()){
+            Column(
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                ContactList(
+                    togglingFavoriteId = togglingFavoriteId,
+                    contacts = contacts,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope,
+                    modifier = Modifier,
+                    screenKey = "contacts",
+                    onChangeFavorite = { contact ->
+                        contactViewModel.toggleFavorite(contact)
+                    },
+                    onRemove = {contact ->
+                        contactViewModel.deleteContact(contact)
+                    },
+                    onUpdate = { contactId ->
+                        onNavigateTo(Screens.EditContact(contactId))
+                    }
+                ) { contactId ->
+                    onNavigateTo(Screens.ContactDetail(contactId, "contacts"))
                 }
-            ) { contactId ->
-                onNavigateTo(Screens.ContactDetail(contactId, "contacts"))
+            }
+        } else {
+            EmptyScreen(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+                BodyLarge(stringResource(R.string.empty_contacts))
             }
         }
     }
