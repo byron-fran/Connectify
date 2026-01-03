@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import com.example.connectify.R
-import com.example.connectify.ui.theme.Card
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,8 +24,7 @@ fun ConnectifyToAppBar(
             if (canNavigateBack) {
                 CustomIconButton(
                     icon = R.drawable.icon_arrow_back,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    size = Card.card_sm
+                    color = MaterialTheme.colorScheme.onBackground
                 ) {
                     onNavigate()
                 }
