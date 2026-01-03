@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
@@ -188,14 +189,15 @@ private fun ContactActionsSection(
                 R.drawable.icon_star_round_filled
             else
                 R.drawable.icon_star_outline,
-            size = Card.card_sm,
-            color = MaterialTheme.colorScheme.tertiary
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.size(24.dp)
         ) {
             onFavoriteToggle()
         }
         CustomIconButton(
             icon = R.drawable.icon_more_vert,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.size(24.dp)
         ) {
             onShowMoreOptions()
         }
