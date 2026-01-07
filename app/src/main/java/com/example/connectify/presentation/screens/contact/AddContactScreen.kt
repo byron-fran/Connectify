@@ -88,14 +88,6 @@ fun AddContactScreen(
                     vertical = Spacing.spacing_lg
                 )
             ) {
-
-                contactViewModel.insertContact(
-                    Contact(
-                        name = name,
-                        email = email,
-                        phoneNumber = phoneNumber,
-                        imageUrl = imageUri?.toString()
-
                 onEvent(
                     ContactUiEvent.InsertContact(
                         Contact(
