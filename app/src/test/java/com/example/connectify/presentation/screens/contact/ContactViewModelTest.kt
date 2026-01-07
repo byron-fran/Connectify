@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.example.connectify.domain.fakes.FakeContactRepository
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.domain.useCases.ContactUseCases
+import com.example.connectify.domain.useCases.DeleteAllContacts
 import com.example.connectify.domain.useCases.DeleteContact
 import com.example.connectify.domain.useCases.GetAllContactsUseCase
 import com.example.connectify.domain.useCases.GetContactById
@@ -59,7 +60,8 @@ class ContactViewModelTest {
                 getAllContacts = GetAllContactsUseCase(fakeRepository),
                 getContactById = GetContactById(fakeRepository),
                 updateContact = UpdateContact(fakeRepository),
-                deleteContact = DeleteContact(fakeRepository)
+                deleteContact = DeleteContact(fakeRepository),
+                deleteAllContacts = DeleteAllContacts(fakeRepository)
             )
 
         viewModel = ContactViewModel(contactUseCases)
@@ -80,13 +82,13 @@ class ContactViewModelTest {
         viewModel.getContactById(contactId1)
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
-        val currentState = viewModel.contactState.value
+        val currentState = viewModel.contactUiState.value
         assertEquals(contactOne, currentState.contact)
     }
 
     @Test
     fun contactViewModel_insertContact() = runTest {
-        viewModel.contactState.test {
+        viewModel.contactUiState.test {
             assertEquals(emptyList<Contact>(), awaitItem().contacts)
             insertContacts(contactOne)
             assertEquals(listOf(contactOne), awaitItem().contacts)
@@ -104,7 +106,7 @@ class ContactViewModelTest {
             email = "juanito99@gmail.com"
         )
         viewModel.updateContact(contactUpdated)
-        val currentState = viewModel.contactState.value
+        val currentState = viewModel.contactUiState.value
         assertEquals(listOf(contactOne, contactUpdated), currentState.contacts)
 
     }
@@ -113,19 +115,19 @@ class ContactViewModelTest {
     fun contactViewModel_getAllContacts() = runTest {
 
         insertContacts(contactOne, contactTwo)
-        val currentState = viewModel.contactState.value
+        val currentState = viewModel.contactUiState.value
         assertEquals(listOf(contactOne, contactTwo), currentState.contacts)
     }
 
     @Test
     fun contactViewModel_getEmptyListWhenNoContacts() = runTest {
-        val currentState = viewModel.contactState.value
+        val currentState = viewModel.contactUiState.value
         assertEquals(emptyList<Contact>(), currentState.contacts)
     }
 
     @Test
     fun contactViewModel_getEmptyContactWhenContactNotFound() = runTest {
-        val currentState = viewModel.contactState.value
+        val currentState = viewModel.contactUiState.value
         assertEquals(null, currentState.contact)
     }
 
@@ -134,7 +136,7 @@ class ContactViewModelTest {
 
         insertContacts(contactOne, contactTwo)
         viewModel.deleteContact(contactTwo)
-        val currentState = viewModel.contactState.value
+        val currentState = viewModel.contactUiState.value
         assertEquals(listOf(contactOne), currentState.contacts)
     }
 
@@ -146,7 +148,7 @@ class ContactViewModelTest {
         viewModel.deleteContact(contactTwo)
         assertEquals(
             emptyList<Contact>(),
-            viewModel.contactState.value.contacts
+            viewModel.contactUiState.value.contacts
         )
 
     }
@@ -157,7 +159,7 @@ class ContactViewModelTest {
         insertContacts(contactOne)
         val contactUpdated = contactOne.copy(isFavorite = true)
         viewModel.toggleFavorite(contactOne)
-        val currentState = viewModel.contactState.value
+        val currentState = viewModel.contactUiState.value
         assertEquals(contactUpdated, currentState.contacts[0])
     }
 
@@ -171,8 +173,8 @@ class ContactViewModelTest {
         viewModel.insertContact(contactFalse)
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(expectedErrorMessage, viewModel.contactState.value.error)
-        assertEquals(emptyList<Contact>(), viewModel.contactState.value.contacts)
+        assertEquals(expectedErrorMessage, viewModel.contactUiState.value.error)
+        assertEquals(emptyList<Contact>(), viewModel.contactUiState.value.contacts)
     }
 
     @Test
@@ -190,8 +192,8 @@ class ContactViewModelTest {
         
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(emptyList<Contact>(), viewModel.contactState.value.contacts)
-        assertEquals(expectedErrorMessage, viewModel.contactState.value.error)
+        assertEquals(emptyList<Contact>(), viewModel.contactUiState.value.contacts)
+        assertEquals(expectedErrorMessage, viewModel.contactUiState.value.error)
 
     }
 
@@ -206,8 +208,8 @@ class ContactViewModelTest {
         // Act
         viewModel.getContactById("")
         // Assert
-        assertEquals(expectedErrorMessage, viewModel.contactState.value.error)
-        assertEquals(null, viewModel.contactState.value.contact)
+        assertEquals(expectedErrorMessage, viewModel.contactUiState.value.error)
+        assertEquals(null, viewModel.contactUiState.value.contact)
     }
 
     @Test
@@ -221,8 +223,8 @@ class ContactViewModelTest {
         viewModel.updateContact(contactToUpdate)
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
         // Assert
-        assertEquals(expectedErrorMessage, viewModel.contactState.value.error)
-        assertEquals(listOf(contactOne, contactTwo), viewModel.contactState.value.contacts)
+        assertEquals(expectedErrorMessage, viewModel.contactUiState.value.error)
+        assertEquals(listOf(contactOne, contactTwo), viewModel.contactUiState.value.contacts)
     }
 
     @Test
@@ -235,15 +237,15 @@ class ContactViewModelTest {
         viewModel.deleteContact(contactOne)
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
         // Assert
-        assertEquals(expectedErrorMessage, viewModel.contactState.value.error)
-        assertEquals(listOf(contactOne), viewModel.contactState.value.contacts)
+        assertEquals(expectedErrorMessage, viewModel.contactUiState.value.error)
+        assertEquals(listOf(contactOne), viewModel.contactUiState.value.contacts)
     }
 
     @Test
     fun contactViewModel_toggleFavorite_revertsOptimisticUpdatedOnFailure() = runTest {
 
         insertContacts(contactOne)
-        val initContact = viewModel.contactState.value.contacts.first()
+        val initContact = viewModel.contactUiState.value.contacts.first()
         assertFalse(initContact.isFavorite)
 
         fakeRepository.shouldThrowOnUpdate = true
@@ -253,7 +255,7 @@ class ContactViewModelTest {
 
         assertNull(viewModel.togglingFavoriteId.value)
 
-        val finalContact = viewModel.contactState.value.contacts.first()
+        val finalContact = viewModel.contactUiState.value.contacts.first()
         assertEquals(false, finalContact.isFavorite)
     }
 }

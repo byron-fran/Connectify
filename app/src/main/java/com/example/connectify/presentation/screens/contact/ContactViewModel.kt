@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.domain.useCases.ContactUseCases
+import com.example.connectify.presentation.states.ContactUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,8 @@ class ContactViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _togglingFavoriteId = mutableStateOf<String?>(null)
+
+
     val togglingFavoriteId: State<String?> = _togglingFavoriteId
 
     private val _selectedContactId = MutableStateFlow<String?>(null)
@@ -33,6 +36,7 @@ class ContactViewModel @Inject constructor(
         .catch { e ->
             _error.value = e.message
         }
+//        .flowOn(Dispatchers.IO)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
@@ -42,7 +46,7 @@ class ContactViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _selectedContact: StateFlow<Contact?> = _selectedContactId
         .flatMapLatest { id ->
-            id?.let { 
+            id?.let {
                 contactUseCases.getContactById(it)
                     .catch { e ->
                         _error.value = e.message
@@ -50,18 +54,19 @@ class ContactViewModel @Inject constructor(
                     }
             } ?: flowOf(null)
         }
+//        .flowOn(Dispatchers.IO)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = null
         )
 
-    val contactState: StateFlow<ContactState> = combine(
+    val contactUiState: StateFlow<ContactUIState> = combine(
         _allContacts,
         _selectedContact,
         _error
     ) { contacts, contact, error ->
-        ContactState(
+        ContactUIState(
             contacts = contacts,
             contact = contact,
             error = error
@@ -69,7 +74,7 @@ class ContactViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = ContactState()
+        initialValue = ContactUIState()
     )
 
     fun insertContact(contact: Contact) {
@@ -96,7 +101,7 @@ class ContactViewModel @Inject constructor(
                 contactUseCases.updateContact(contact)
 
             } catch (e: Exception) {
-               _error.value = e.message
+                _error.value = e.message
             }
         }
     }
@@ -107,7 +112,7 @@ class ContactViewModel @Inject constructor(
             try {
                 contactUseCases.deleteContact(contact)
             } catch (e: Exception) {
-               _error.value = e.message
+                _error.value = e.message
             }
         }
 
@@ -117,8 +122,8 @@ class ContactViewModel @Inject constructor(
         viewModelScope.launch {
             val newValue = !contact.isFavorite
             val contactOptimistic = contact.copy(isFavorite = newValue)
-
             _togglingFavoriteId.value = contact.id
+
 
             try {
                 contactUseCases.updateContact(contactOptimistic)
@@ -127,6 +132,26 @@ class ContactViewModel @Inject constructor(
             } finally {
                 _togglingFavoriteId.value = null
             }
+        }
+    }
+    fun deleteAllContacts() {
+        viewModelScope.launch {
+            try {
+
+                contactUseCases.deleteAllContacts()
+            }catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+    fun onEvent(event: ContactUiEvent) {
+        when (event) {
+            is ContactUiEvent.ToggleFavorite -> toggleFavorite(event.contact)
+            is ContactUiEvent.DeleteContact -> deleteContact(event.contact)
+            is ContactUiEvent.UpdateContact -> updateContact(event.contact)
+            is ContactUiEvent.InsertContact -> insertContact(event.contact)
+            is ContactUiEvent.GetContact -> getContactById(event.contactId)
+            is ContactUiEvent.DeleteAllContacts -> deleteAllContacts()
         }
     }
 }

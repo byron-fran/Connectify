@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,23 +19,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactForm
 import com.example.connectify.presentation.components.contact.ContactFormImage
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.TitleMedium
+import com.example.connectify.presentation.states.ContactUiEvent
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.FileUtils
 
 @Composable
 fun ContactEditScreen(
     contactId: String?,
-    contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
+    onEvent : (ContactUiEvent) -> Unit,
+    contactUiState : ContactUIState,
     onNavigateBack: () -> Unit
 ) {
 
-    val contactState = contactViewModel.contactState.collectAsState().value
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -54,8 +53,8 @@ fun ContactEditScreen(
             }
         }
     )
-    LaunchedEffect(contactState.contact) {
-        contactState.contact?.let {
+    LaunchedEffect(contactUiState.contact) {
+        contactUiState.contact?.let {
             name = it.name
             email = it.email ?: ""
             phoneNumber = it.phoneNumber
@@ -65,7 +64,7 @@ fun ContactEditScreen(
 
     LaunchedEffect(contactId) {
         contactId?.let {
-            contactViewModel.getContactById(contactId)
+            onEvent(ContactUiEvent.GetContact(contactId))
 
         }
     }
@@ -81,7 +80,7 @@ fun ContactEditScreen(
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
 
-            contactState.contact?.let {
+            contactUiState.contact?.let {
                 ContactFormImage(
                     imageUri = imageUri.toString(),
                     onImageChange = {
@@ -116,7 +115,7 @@ fun ContactEditScreen(
                         phoneNumber = phoneNumber,
                         imageUrl = imageUri.toString()
                     )
-                    contactViewModel.updateContact(updatedContact)
+                    onEvent(ContactUiEvent.UpdateContact(updatedContact))
                     onNavigateBack()
                     toast.show()
                 }

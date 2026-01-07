@@ -31,6 +31,7 @@ import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.ui.theme.Card
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.ContactCardModifiers
+import com.example.connectify.utils.Tag.CONTACT_CARD
 
 @Composable
 fun ContactCard(
@@ -46,7 +47,8 @@ fun ContactCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(),
+            .animateContentSize()
+            .testTag("${CONTACT_CARD}_${contact.id}"),
         shape = RoundedCornerShape(Spacing.spacing_md),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface

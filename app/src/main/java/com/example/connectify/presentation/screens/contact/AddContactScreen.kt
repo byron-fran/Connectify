@@ -16,22 +16,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.presentation.components.contact.ContactForm
 import com.example.connectify.presentation.components.contact.ContactFormImage
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.TitleMedium
-import com.example.connectify.presentation.navigation.Screens
+import com.example.connectify.presentation.states.ContactUiEvent
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.utils.FileUtils
+import com.example.connectify.utils.Tag.ADD_CONTACT_SCREEN
 
 @Composable
 fun AddContactScreen(
-    contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
-    onNavigateTo: (Screens) -> Unit,
+    onEvent: (ContactUiEvent) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
@@ -57,11 +57,12 @@ fun AddContactScreen(
     Scaffold(
         topBar = {
             ConnectifyToAppBar(
-                title = { TitleMedium( stringResource(id = R.string.add_contact)) }
+                title = { TitleMedium(stringResource(id = R.string.add_contact)) }
             ) {
                 onNavigateBack()
             }
-        }
+        },
+        modifier = Modifier.testTag(ADD_CONTACT_SCREEN)
     ) { paddingValues ->
 
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -87,12 +88,23 @@ fun AddContactScreen(
                     vertical = Spacing.spacing_lg
                 )
             ) {
+
                 contactViewModel.insertContact(
                     Contact(
                         name = name,
                         email = email,
                         phoneNumber = phoneNumber,
                         imageUrl = imageUri?.toString()
+
+                onEvent(
+                    ContactUiEvent.InsertContact(
+                        Contact(
+                            name = name,
+                            email = email,
+                            phoneNumber = phoneNumber,
+                            imageUrl = imageUri?.toString()
+                        )
+
                     )
                 )
                 onNavigateBack()

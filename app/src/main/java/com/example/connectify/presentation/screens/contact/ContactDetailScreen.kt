@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,11 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.domain.models.Contact
 import com.example.connectify.presentation.components.contact.ContactHeader
@@ -56,11 +55,13 @@ import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.CustomIcon
 import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.presentation.navigation.Screens
+import com.example.connectify.presentation.states.ContactUiEvent
 import com.example.connectify.ui.theme.RoundedCorner
 import com.example.connectify.ui.theme.Spacing
 import com.example.connectify.ui.theme.Spacing.spacing_md
 import com.example.connectify.utils.ContactCardModifiers
 import com.example.connectify.utils.SharedTransition
+import com.example.connectify.utils.Tag.CONTACT_DETAIL_SCREEN
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,21 +74,23 @@ fun ContactDetailScreen(
     screenKey: String? = null,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
+    togglingFavoriteId : String?,
+    contactUiState : ContactUIState,
+    onEvent : (ContactUiEvent) -> Unit,
     onNavigateToEdit: (Screens) -> Unit,
     onNavigateBack: () -> Unit
 
 ) {
 
     val scrollState = rememberScrollState()
-    val contact = contactViewModel.contactState.collectAsState().value.contact
+    val contact = contactUiState.contact
     var showDialog by remember { mutableStateOf(false) }
-    val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
 
     LaunchedEffect(contactId) {
         contactId?.let {
             withContext(Dispatchers.IO) {
-                contactViewModel.getContactById(contactId)
+                onEvent(ContactUiEvent.GetContact(contactId))
+
             }
         }
     }
@@ -104,7 +107,7 @@ fun ContactDetailScreen(
             ) { onNavigateBack() }
         },
         containerColor = MaterialTheme.colorScheme.background,
-        modifier = Modifier
+        modifier = Modifier.testTag("${CONTACT_DETAIL_SCREEN}_$contactId")
     ) { paddingValues ->
         contact?.let {
             with(sharedTransitionScope) {
@@ -151,7 +154,7 @@ fun ContactDetailScreen(
                         togglingFavoriteId = togglingFavoriteId,
                         modifier = Modifier.padding(horizontal = Spacing.spacing_sm)
                     ) {
-                        contactViewModel.toggleFavorite(contact)
+                        onEvent(ContactUiEvent.ToggleFavorite(contact))
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     ButtonError(
@@ -168,7 +171,7 @@ fun ContactDetailScreen(
                     text = stringResource(R.string.confirm_delete_message),
                     showDialog,
                     onConfirm = {
-                        contactViewModel.deleteContact(it)
+                        onEvent(ContactUiEvent.DeleteContact(it))
                         onNavigateBack()
                     },
                     onCancel = { showDialog = !showDialog }

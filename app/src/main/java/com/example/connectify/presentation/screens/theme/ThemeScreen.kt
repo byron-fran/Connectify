@@ -13,12 +13,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.global.BodyLarge
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
@@ -29,10 +26,10 @@ import com.example.connectify.utils.ThemeMode
 
 @Composable
 fun ThemeScreen(
-    themeViewModel: ThemeViewModel = hiltViewModel(),
+    themeMode: ThemeMode,
+    onChangeTheme : (ThemeMode) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
-    val themeMode by themeViewModel.themeMode.collectAsState()
 
     Scaffold(
         topBar = {
@@ -55,17 +52,17 @@ fun ThemeScreen(
                 ThemeModeOption(
                     mode = ThemeMode.DARK,
                     selected = themeMode == ThemeMode.DARK,
-                    onClick = { themeViewModel.setThemeMode(ThemeMode.DARK) }
+                    onClick = { onChangeTheme(ThemeMode.DARK) }
                 )
                 ThemeModeOption(
                     mode = ThemeMode.LIGHT,
                     selected = themeMode == ThemeMode.LIGHT,
-                    onClick = { themeViewModel.setThemeMode(ThemeMode.LIGHT) }
+                    onClick = { onChangeTheme(ThemeMode.LIGHT) }
                 )
                 ThemeModeOption(
                     mode = ThemeMode.FOLLOW_SYSTEM,
                     selected = themeMode == ThemeMode.FOLLOW_SYSTEM,
-                    onClick = { themeViewModel.setThemeMode(ThemeMode.FOLLOW_SYSTEM) }
+                    onClick = { onChangeTheme(ThemeMode.FOLLOW_SYSTEM) }
                 )
             }
         }
