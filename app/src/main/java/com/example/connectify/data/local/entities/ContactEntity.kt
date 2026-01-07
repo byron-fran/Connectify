@@ -14,7 +14,7 @@ data class ContactEntity(
     val name : String = "",
 
     @ColumnInfo(name = "phone_number")
-    val phoneNumber : Long = 0,
+    val phoneNumber : String = "",
 
     @ColumnInfo(name = "email")
     val email : String? = "",

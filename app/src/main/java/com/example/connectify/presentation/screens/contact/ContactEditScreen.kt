@@ -58,7 +58,7 @@ fun ContactEditScreen(
         contactState.contact?.let {
             name = it.name
             email = it.email ?: ""
-            phoneNumber = it.phoneNumber.toString()
+            phoneNumber = it.phoneNumber
             imageUri = it.imageUrl?.toUri()
         }
     }
@@ -113,7 +113,7 @@ fun ContactEditScreen(
                     val updatedContact = it.copy(
                         name = name,
                         email = email,
-                        phoneNumber = phoneNumber.toLong(),
+                        phoneNumber = phoneNumber,
                         imageUrl = imageUri.toString()
                     )
                     contactViewModel.updateContact(updatedContact)

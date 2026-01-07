@@ -91,7 +91,7 @@ fun AddContactScreen(
                     Contact(
                         name = name,
                         email = email,
-                        phoneNumber = phoneNumber.toLong(),
+                        phoneNumber = phoneNumber,
                         imageUrl = imageUri?.toString()
                     )
                 )

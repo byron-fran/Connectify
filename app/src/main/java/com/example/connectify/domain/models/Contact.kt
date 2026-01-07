@@ -7,7 +7,7 @@ import kotlin.random.Random
 data class Contact(
     val id : String = UUID.randomUUID().toString(),
     var name : String = "",
-    var phoneNumber : Long = 0,
+    var phoneNumber : String = "",
     var email : String? = "",
     var imageUrl : String? = "",
     var description : String? = "",
