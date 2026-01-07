@@ -8,18 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactList
 import com.example.connectify.presentation.components.global.BodyLarge
 import com.example.connectify.presentation.components.global.ConnectifyToAppBar
 import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.presentation.navigation.Screens
-import com.example.connectify.presentation.screens.contact.ContactViewModel
+import com.example.connectify.presentation.screens.contact.ContactUIState
 import com.example.connectify.presentation.screens.empty.EmptyScreen
+import com.example.connectify.presentation.states.ContactUiEvent
 import com.example.connectify.ui.theme.Spacing
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -27,13 +26,14 @@ import com.example.connectify.ui.theme.Spacing
 fun FavoriteContactsScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    contactViewModel: ContactViewModel = hiltViewModel<ContactViewModel>(),
+    togglingFavoriteId : String?,
+    contactUiState : ContactUIState,
+    onEvent : (ContactUiEvent) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateTo: (Screens) -> Unit
 ) {
 
-    val favoritesContact = contactViewModel.contactState.collectAsState().value.contacts
-    val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
+    val favoritesContact = contactUiState.contacts
     Scaffold(
         topBar = {
             ConnectifyToAppBar(
@@ -57,10 +57,10 @@ fun FavoriteContactsScreen(
                     modifier = Modifier.padding(horizontal = Spacing.spacing_sm),
                     screenKey = "favorites",
                     onChangeFavorite = { contact ->
-                        contactViewModel.updateContact(contact.copy( isFavorite = !contact.isFavorite))
+                        onEvent(ContactUiEvent.UpdateContact(contact.copy( isFavorite = !contact.isFavorite)))
                     },
                     onRemove = { contact ->
-                        contactViewModel.deleteContact(contact)
+                        onEvent(ContactUiEvent.DeleteContact(contact))
                     },
                     onUpdate = { contactId ->
                         onNavigateTo(Screens.EditContact(contactId))
