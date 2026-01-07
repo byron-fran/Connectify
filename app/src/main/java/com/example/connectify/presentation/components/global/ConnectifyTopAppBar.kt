@@ -1,6 +1,7 @@
 package com.example.connectify.presentation.components.global
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +9,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.example.connectify.R
 import com.example.connectify.utils.Tag.GOBACK_BUTTON
 
@@ -28,7 +30,9 @@ fun ConnectifyToAppBar(
                 CustomIconButton(
                     icon = R.drawable.icon_arrow_back,
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.testTag(GOBACK_BUTTON)
+                    modifier = Modifier
+                        .size(24.dp)
+                        .testTag(GOBACK_BUTTON)
                 ) {
                     onNavigate()
                 }

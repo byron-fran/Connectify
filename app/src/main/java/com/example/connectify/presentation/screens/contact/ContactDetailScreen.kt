@@ -100,7 +100,11 @@ fun ContactDetailScreen(
             ConnectifyToAppBar(
                 title = { },
                 actions = {
-                    CustomIconButton( icon = R.drawable.icon_edit, color = MaterialTheme.colorScheme.onBackground) {
+                    CustomIconButton(
+                        icon = R.drawable.icon_edit,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(24.dp)
+                        ) {
                         contact?.let { onNavigateToEdit(Screens.EditContact(contact.id)) }
                     }
                 }
