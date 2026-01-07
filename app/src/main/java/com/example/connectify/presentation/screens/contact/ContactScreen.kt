@@ -11,12 +11,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.connectify.R
 import com.example.connectify.presentation.components.contact.ContactList
 import com.example.connectify.presentation.components.global.BodyLarge
@@ -26,18 +23,23 @@ import com.example.connectify.presentation.components.global.CustomIconButton
 import com.example.connectify.presentation.components.global.TitleMedium
 import com.example.connectify.presentation.navigation.Screens
 import com.example.connectify.presentation.screens.empty.EmptyScreen
+import com.example.connectify.presentation.states.ContactUiEvent
 import com.example.connectify.ui.theme.Card
+import com.example.connectify.utils.Tag.ADD_CONTACT_BUTTON
+import com.example.connectify.utils.Tag.CONTACT_SCREEN
+import com.example.connectify.utils.Tag.SETTINGS_BUTTON
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ContactScreen(
+    contactUiState: ContactUIState,
+    onEvent: (ContactUiEvent) -> Unit,
+    togglingFavoriteId: String?,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    contactViewModel: ContactViewModel = hiltViewModel(),
     onNavigateTo: (Screens) -> Unit,
 ) {
-    val contacts = contactViewModel.contactState.collectAsState().value.contacts
-    val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
+    val contacts = contactUiState.contacts
 
     Scaffold(
         topBar = {
@@ -47,7 +49,8 @@ fun ContactScreen(
                 actions = {
                     CustomIconButton(
                         icon = R.drawable.icon_settings,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.testTag(SETTINGS_BUTTON)
                     ) {
                         onNavigateTo(Screens.Settings)
                     }
@@ -57,13 +60,13 @@ fun ContactScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-
                 onClick = {
                     onNavigateTo(Screens.AddContact)
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
+                modifier = Modifier.testTag(ADD_CONTACT_BUTTON)
+            ) {  
                 CustomIcon(
                     icon = R.drawable.icon_add,
                     modifier = Modifier.size(Card.card_sm),
@@ -72,12 +75,11 @@ fun ContactScreen(
             }
         },
         containerColor = MaterialTheme.colorScheme.background,
-        modifier = Modifier.semantics{
-            contentDescription = "Contact Screen"
-        }
+        modifier = Modifier
+            .testTag(CONTACT_SCREEN)
     ) { paddingValues ->
 
-        if(contacts.isNotEmpty()){
+        if (contacts.isNotEmpty()) {
             Column(
                 modifier = Modifier.padding(paddingValues)
             ) {
@@ -89,10 +91,10 @@ fun ContactScreen(
                     modifier = Modifier,
                     screenKey = "contacts",
                     onChangeFavorite = { contact ->
-                        contactViewModel.toggleFavorite(contact)
+                        onEvent(ContactUiEvent.ToggleFavorite(contact))
                     },
-                    onRemove = {contact ->
-                        contactViewModel.deleteContact(contact)
+                    onRemove = { contact ->
+                        onEvent(ContactUiEvent.DeleteContact(contact))
                     },
                     onUpdate = { contactId ->
                         onNavigateTo(Screens.EditContact(contactId))
@@ -102,7 +104,11 @@ fun ContactScreen(
                 }
             }
         } else {
-            EmptyScreen(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            EmptyScreen(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
                 BodyLarge(stringResource(R.string.empty_contacts))
             }
         }
