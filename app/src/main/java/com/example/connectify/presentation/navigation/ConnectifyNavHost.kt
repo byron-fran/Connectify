@@ -12,6 +12,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -21,10 +23,12 @@ import com.example.connectify.presentation.screens.contact.AddContactScreen
 import com.example.connectify.presentation.screens.contact.ContactDetailScreen
 import com.example.connectify.presentation.screens.contact.ContactEditScreen
 import com.example.connectify.presentation.screens.contact.ContactScreen
+import com.example.connectify.presentation.screens.contact.ContactViewModel
 import com.example.connectify.presentation.screens.favorites.FavoriteContactsScreen
 import com.example.connectify.presentation.screens.search.SearchScreen
 import com.example.connectify.presentation.screens.settings.SettingsScreen
 import com.example.connectify.presentation.screens.theme.ThemeScreen
+import com.example.connectify.presentation.screens.theme.ThemeViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -40,7 +44,11 @@ fun ConnectifyNavHost(
         ) {
 
             composable<Screens.Contacts> {
+                val contactViewModel : ContactViewModel = hiltViewModel()
                 ContactScreen(
+                    contactUiState = contactViewModel.contactUiState.collectAsState().value,
+                    onEvent = contactViewModel::onEvent,
+                    togglingFavoriteId = contactViewModel.togglingFavoriteId.value,
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedContentScope = this@composable,
                 ) { route ->
@@ -51,33 +59,42 @@ fun ConnectifyNavHost(
 
                 val contactId = navBackStackEntry.arguments?.getString("contactId")
                 val screenKey = navBackStackEntry.arguments?.getString("screenKey")
+                val contactViewModel : ContactViewModel = hiltViewModel()
+                val togglingFavoriteId = contactViewModel.togglingFavoriteId.value
 
                 ContactDetailScreen(
                     contactId = contactId,
                     screenKey = screenKey,
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedContentScope = this@composable,
+                    togglingFavoriteId = togglingFavoriteId,
+                    contactUiState = contactViewModel.contactUiState.collectAsState().value,
+                    onEvent = contactViewModel::onEvent,
                     onNavigateToEdit = {
                         navHostController.navigate(Screens.EditContact(contactId))
                     }
-
                 ) {
                     navHostController.popBackStack()
                 }
             }
             composable<Screens.AddContact> {
+                val contactViewModel : ContactViewModel = hiltViewModel()
                 AddContactScreen(
-                    onNavigateTo = { route ->
-                        navHostController.navigate(route)
-                    },
-                    onNavigateBack = {
-                        navHostController.popBackStack()
+                    onEvent = { contactUiEvent ->
+                        contactViewModel.onEvent(contactUiEvent)
                     }
-                )
+                ) {
+                    navHostController.popBackStack()
+                }
             }
             composable<Screens.EditContact> { navBackStackEntry ->
                 val contactId = navBackStackEntry.arguments?.getString("contactId")
-                ContactEditScreen(contactId) {
+                val contactViewModel : ContactViewModel = hiltViewModel()
+                ContactEditScreen(
+                    contactId = contactId,
+                    contactUiState = contactViewModel.contactUiState.collectAsState().value,
+                    onEvent = contactViewModel::onEvent
+                ) {
                     navHostController.popBackStack()
                 }
             }
@@ -96,9 +113,13 @@ fun ConnectifyNavHost(
                 enterTransition = { enterAnimation() },
                 exitTransition = { exitAnimation() }
             ) {
+                val contactViewModel = hiltViewModel<ContactViewModel>()
                 FavoriteContactsScreen(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedContentScope = this@composable,
+                    contactUiState = contactViewModel.contactUiState.collectAsState().value,
+                    onEvent = contactViewModel::onEvent,
+                    togglingFavoriteId = contactViewModel.togglingFavoriteId.value,
                     onNavigateBack = {
                         navHostController.popBackStack()
                     },
@@ -108,7 +129,10 @@ fun ConnectifyNavHost(
                 )
             }
             composable<Screens.Settings> {
+                val contactViewModel = hiltViewModel<ContactViewModel>()
                 SettingsScreen(
+                    isNotEmptyContacts = contactViewModel.contactUiState.collectAsState().value.contacts.isNotEmpty(),
+                    onEvent = contactViewModel::onEvent,
                     onNavigateTo = { route ->
                         navHostController.navigate(route)
                     }
@@ -117,7 +141,11 @@ fun ConnectifyNavHost(
                 }
             }
             composable<Screens.Theme> {
-                ThemeScreen() {
+                val themeViewModel = hiltViewModel<ThemeViewModel>()
+                ThemeScreen(
+                    themeMode = themeViewModel.themeMode.collectAsState().value,
+                    onChangeTheme = themeViewModel::setThemeMode,
+                ) {
                     navHostController.popBackStack()
                 }
             }
