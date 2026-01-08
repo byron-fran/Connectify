@@ -65,6 +65,13 @@ class FakeContactRepository : ContactRepository {
         }
     }
 
+    override suspend fun deleteAllContacts() {
+        if(shouldThrowOnDelete) {
+            throw Exception("Error deleting contacts")
+        }
+        contacts.value = emptyList()
+    }
+
     fun clear() {
         contacts.value = emptyList()
         shouldThrowOnInsert = false
