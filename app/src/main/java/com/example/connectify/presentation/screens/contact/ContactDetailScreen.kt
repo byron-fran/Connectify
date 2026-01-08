@@ -216,13 +216,13 @@ fun ContactDetailBody(
                         icon = R.drawable.icon_phone,
                         modifier = ModifierButtonDetail()
                     ) {
-                        callPhone(contact.phoneNumber.toString(), context)
+                        callPhone(contact.phoneNumber, context)
                     }
                     CustomIconButton(
                         icon = R.drawable.icon_message,
                         modifier = ModifierButtonDetail()
                     ) {
-                        sendSMS(contact.phoneNumber.toString(), context)
+                        sendSMS(contact.phoneNumber, context)
                     }
                     contact.email?.let { e ->
                         if (e.isNotEmpty()) {
@@ -246,7 +246,7 @@ fun ContactDetailBody(
                 }
             }
             ContactDataInfo(
-                phoneNumber = contact.phoneNumber.toString(),
+                phoneNumber = contact.phoneNumber,
                 email = contact.email ?: "",
                 modifier = Modifier.fillMaxWidth()
             )
@@ -293,7 +293,7 @@ fun ContactDeleteDialog(
                         horizontalArrangement = Arrangement.spacedBy(Spacing.spacing_md)
                     ) {
                         ButtonError(
-                            text = "Sí, eliminar",
+                            text = stringResource(R.string.confirm_delete),
                             modifier = Modifier.weight(1f)
                         ) {
                             onConfirm()
