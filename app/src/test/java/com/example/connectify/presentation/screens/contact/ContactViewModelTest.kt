@@ -10,6 +10,7 @@ import com.example.connectify.domain.useCases.GetAllContactsUseCase
 import com.example.connectify.domain.useCases.GetContactById
 import com.example.connectify.domain.useCases.InsertContactUseCase
 import com.example.connectify.domain.useCases.UpdateContact
+import com.example.connectify.presentation.states.ContactUiEvent
 import com.example.connectify.util.MainDispatcherRule
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
@@ -25,19 +26,10 @@ class ContactViewModelTest {
     private val contactId1 = UUID.randomUUID().toString()
     private val contactId2 = UUID.randomUUID().toString()
 
-    private val contactOne = Contact(
-        id = contactId1,
-        name = "juan",
-        email = "juan@gmail.com"
-    )
-    private val contactTwo = Contact(
-        id = contactId2,
-        name = "byron",
-        email = "byron@gmail.com"
-    )
+    private val contactOne = Contact(id = contactId1, name = "juan", email = "juan@gmail.com")
+    private val contactTwo = Contact(id = contactId2, name = "byron", email = "byron@gmail.com")
 
-    @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var viewModel: ContactViewModel
     private lateinit var fakeRepository: FakeContactRepository
@@ -77,9 +69,10 @@ class ContactViewModelTest {
 
     @Test
     fun viewModel_getContactById_returnCorrectContact() = runTest {
-
         insertContacts(contactOne)
-        viewModel.getContactById(contactId1)
+
+        val event = ContactUiEvent.GetContact(contactId1)
+        viewModel.onEvent(event)
 
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
         val currentState = viewModel.contactUiState.value
@@ -94,26 +87,19 @@ class ContactViewModelTest {
             assertEquals(listOf(contactOne), awaitItem().contacts)
             cancelAndIgnoreRemainingEvents()
         }
-
     }
 
     @Test
     fun contactViewModel_updateContact() = runTest {
-
         insertContacts(contactOne, contactTwo)
-        val contactUpdated = contactTwo.copy(
-            name = "Juanito",
-            email = "juanito99@gmail.com"
-        )
+        val contactUpdated = contactTwo.copy(name = "Juanito", email = "juanito99@gmail.com")
         viewModel.updateContact(contactUpdated)
         val currentState = viewModel.contactUiState.value
         assertEquals(listOf(contactOne, contactUpdated), currentState.contacts)
-
     }
 
     @Test
     fun contactViewModel_getAllContacts() = runTest {
-
         insertContacts(contactOne, contactTwo)
         val currentState = viewModel.contactUiState.value
         assertEquals(listOf(contactOne, contactTwo), currentState.contacts)
@@ -133,7 +119,6 @@ class ContactViewModelTest {
 
     @Test
     fun contactViewModel_deleteContactById() = runTest {
-
         insertContacts(contactOne, contactTwo)
         viewModel.deleteContact(contactTwo)
         val currentState = viewModel.contactUiState.value
@@ -142,27 +127,20 @@ class ContactViewModelTest {
 
     @Test
     fun contactViewModel_deleteAllContacts() = runTest {
-
         insertContacts(contactOne, contactTwo)
-        viewModel.deleteContact(contactOne)
-        viewModel.deleteContact(contactTwo)
-        assertEquals(
-            emptyList<Contact>(),
-            viewModel.contactUiState.value.contacts
-        )
-
+        val event = ContactUiEvent.DeleteAllContacts
+        viewModel.onEvent(event)
+        assertEquals(emptyList<Contact>(), viewModel.contactUiState.value.contacts)
     }
 
     @Test
     fun contactViewModel_toggleFavorite() = runTest {
-
         insertContacts(contactOne)
         val contactUpdated = contactOne.copy(isFavorite = true)
         viewModel.toggleFavorite(contactOne)
         val currentState = viewModel.contactUiState.value
         assertEquals(contactUpdated, currentState.contacts[0])
     }
-
 
     @Test
     fun contactViewModel_insertContact_setErrorOnFailure() = runTest {
@@ -180,21 +158,20 @@ class ContactViewModelTest {
     @Test
     fun contactViewModel_getAllContacts_setErrorOnFailure() = runTest {
         val expectedErrorMessage = "Error fetching contacts"
-        
+
         fakeRepository.shouldThrowOnGetAll = true
-        
+
         val tempContact = Contact()
         fakeRepository.shouldThrowOnInsert = false
 
         fakeRepository.insertContact(tempContact)
         fakeRepository.shouldThrowOnDelete = false
         fakeRepository.deleteContactById(tempContact)
-        
+
         mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(emptyList<Contact>(), viewModel.contactUiState.value.contacts)
         assertEquals(expectedErrorMessage, viewModel.contactUiState.value.error)
-
     }
 
     @Test
@@ -242,8 +219,20 @@ class ContactViewModelTest {
     }
 
     @Test
-    fun contactViewModel_toggleFavorite_revertsOptimisticUpdatedOnFailure() = runTest {
+    fun contactViewModel_deleteAllContacts_setErrorOnFailure() = runTest {
+        // Arrange
+        val expectedErrorMessage = "Error deleting contacts"
+        insertContacts(contactOne, contactTwo)
+        fakeRepository.shouldThrowOnDelete = true
+        // act
+        viewModel.deleteAllContacts()
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(contactOne, contactTwo), viewModel.contactUiState.value.contacts)
+        assertEquals(expectedErrorMessage, viewModel.contactUiState.value.error)
+    }
 
+    @Test
+    fun contactViewModel_toggleFavorite_revertsOptimisticUpdatedOnFailure() = runTest {
         insertContacts(contactOne)
         val initContact = viewModel.contactUiState.value.contacts.first()
         assertFalse(initContact.isFavorite)

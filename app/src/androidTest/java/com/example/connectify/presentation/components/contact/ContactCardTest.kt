@@ -13,7 +13,7 @@ class ContactCardTest {
     private val contactOne = Contact(
         id = contactId,
         name = "Jose",
-        phoneNumber = 123456789,
+        phoneNumber = "123456789",
         email = "juan@gmail.com",
         imageUrl = null,
         isFavorite = false

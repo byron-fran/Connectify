@@ -23,13 +23,13 @@ class SearchDaoTest {
     private val contactOne = ContactEntity(
         id = contactId1,
         name = "Byron",
-        phoneNumber = 123456789,
+        phoneNumber = "123456789",
         email = "byron99@gmail.com",
     )
     private val contactTwo = ContactEntity(
         id = contactId2,
         name = "Francisco",
-        phoneNumber = 987654321,
+        phoneNumber = "987654321",
         email = "francisco99@gmail.com",
     )
 
