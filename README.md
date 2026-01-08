@@ -77,13 +77,14 @@ This structure improves maintainability, scalability, and testability.
 *Below are some images of the application:*
 
 ---
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; ">
+<img src="https://res.cloudinary.com/dtvbans9e/image/upload/v1767884814/projects/android/Jetpack%20compose/Connectify/wauue0j1hdxqobuneurk.png" width="300" alt="image_preview_1"/>
+<img src="https://res.cloudinary.com/dtvbans9e/image/upload/v1767886530/projects/android/Jetpack%20compose/Connectify/emddw026dg7qnsiuyecs.png" width="300" alt="image_preview_2"/>
+<img src="https://res.cloudinary.com/dtvbans9e/image/upload/v1767886530/projects/android/Jetpack%20compose/Connectify/tjiqgn3vaur3sr0kiqr2.png" width="300" alt="image_preview_3"/>
+</div>
 
-![image-preview-1](https://res.cloudinary.com/dtvbans9e/image/upload/v1767884814/projects/android/Jetpack%20compose/Connectify/wauue0j1hdxqobuneurk.png)
-![image-preview-2](https://res.cloudinary.com/dtvbans9e/image/upload/v1767886530/projects/android/Jetpack%20compose/Connectify/emddw026dg7qnsiuyecs.png)
-![image-preview-3](https://res.cloudinary.com/dtvbans9e/image/upload/v1767886530/projects/android/Jetpack%20compose/Connectify/tjiqgn3vaur3sr0kiqr2.png)
-![image-preview-4](https://res.cloudinary.com/dtvbans9e/image/upload/v1767886530/projects/android/Jetpack%20compose/Connectify/gagfq3givzbq6fpu9vdm.png)
-
+<div>
+<img src="https://res.cloudinary.com/dtvbans9e/image/upload/v1767886530/projects/android/Jetpack%20compose/Connectify/gagfq3givzbq6fpu9vdm.png" width="700" alt="image_preview_4"/>   
 </div>
 
 ## 🚀 Installation
